@@ -7,6 +7,7 @@ export interface ObservedMessage {
   observedAt: string;
   platformTime?: string;
   author?: string;
+  own: boolean;
   authorEvidence: 'explicit' | 'inferred' | 'unknown';
   origin: 'initial' | 'observed' | 'recovered';
 }
@@ -72,7 +73,8 @@ export class TelemostAdapter implements PlatformAdapter {
         const text = row.querySelector('.yamb-message-text > .text')?.textContent?.trim();
         if (!text) continue;
         const platformTime = row.querySelector('.yamb-message-info__time')?.textContent?.trim() || undefined;
-        const signature = JSON.stringify([text, platformTime]);
+        const own = row.classList.contains('yamb-message-row_own');
+        const signature = JSON.stringify([text, platformTime, own]);
         const occurrence = (occurrences.get(signature) ?? 0) + 1;
         occurrences.set(signature, occurrence);
         let candidate = pending.get(row);
@@ -86,7 +88,7 @@ export class TelemostAdapter implements PlatformAdapter {
         if (occurrence <= (counts.get(signature) ?? 0)) continue;
         counts.set(signature, occurrence);
         const author = row.querySelector('.yamb-message-user__name')?.textContent?.trim() || undefined;
-        onMessage?.({ eventId: crypto.randomUUID(), text, platformTime, author,
+        onMessage?.({ eventId: crypto.randomUUID(), text, platformTime, author, own,
           authorEvidence: author ? 'explicit' : 'unknown', observedAt: new Date(candidate.since).toISOString(), origin: candidate.origin });
       }
     };
