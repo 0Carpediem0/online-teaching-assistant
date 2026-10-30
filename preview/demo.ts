@@ -15,7 +15,7 @@ const view = createView(root, {
   start() { state = { ...state, active: true, ended: false, chat: 'available', messages: [], pip: state.pipPreferred }; render(); },
   stop() { state.active = false; state.ended = true; render(); },
   history(value) { state.history = value; render(); },
-  pip(value) { state.pipPreferred = value; state.pip = state.active && value; render(); }
+  pip(value) { state.pipPreferred = value; state.pip = state.active && value; if (value) state.error = ''; render(); }
 }, true);
 function render() {
   view.render(state); pipView.render(state);
@@ -28,7 +28,7 @@ function render() {
 }
 document.querySelectorAll<HTMLButtonElement>('[data-scene]').forEach(button => button.onclick = () => {
   const scene = button.dataset.scene;
-  state = { ...state, active: scene !== 'ready' && scene !== 'ended', ended: scene === 'ended', messages: scene === 'ready' ? [] : samples(), chat: scene === 'unavailable' ? 'unavailable' : 'available', history: false, error: '', supported: scene !== 'unsupported', pip: scene !== 'ready' && scene !== 'unsupported', pipPreferred: scene !== 'ready' && scene !== 'unsupported' };
+  state = { ...state, active: scene !== 'ready' && scene !== 'ended', ended: scene === 'ended', messages: scene === 'ready' ? [] : samples(), chat: scene === 'unavailable' ? 'unavailable' : 'available', history: false, error: scene === 'error' ? 'Не удалось открыть окно. Вернитесь в Телемост и попробуйте ещё раз.' : '', supported: scene !== 'unsupported', pip: scene !== 'ready' && scene !== 'unsupported' && scene !== 'error', pipPreferred: scene !== 'ready' && scene !== 'unsupported' && scene !== 'error' };
   render(); button.setAttribute('aria-pressed', 'true');
 });
 document.querySelector<HTMLFormElement>('#compose')!.onsubmit = event => {
