@@ -1,0 +1,10 @@
+import { createRequire } from 'node:module';
+import { resolve } from 'node:path';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+const require = createRequire(import.meta.url);
+const { build } = require(process.argv[2] ? resolve(process.argv[2]) : 'esbuild');
+await mkdir('dist-preview', { recursive: true });
+const result = await build({ entryPoints: ['preview/demo.ts'], bundle: true, format: 'iife', target: 'chrome120', write: false });
+const html = await readFile('preview/index.html', 'utf8');
+await writeFile('dist-preview/index.html', html.replace('<!-- DEMO_SCRIPT -->', () => `<script>${result.outputFiles[0].text.replaceAll('</script', '<\\/script')}</script>`));
+console.log('Built dist-preview/index.html (standalone, no server required)');
