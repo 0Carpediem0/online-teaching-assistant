@@ -3,6 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "scripts": { "typecheck": "tsc --noEmit", "build": "node scripts/build.mjs" },
+  "scripts": { "typecheck": "tsc --noEmit", "build": "node scripts/build.mjs", "preview:build": "node scripts/build-preview.mjs" },
   "devDependencies": { "typescript": "5.9.2", "esbuild": "0.27.7" }
 }
