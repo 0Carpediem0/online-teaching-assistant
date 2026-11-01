@@ -49,4 +49,4 @@
 
 - [Паспорт проекта](PROJECT-PASSPORT.md)
 - [Схема обработки данных](DATA-FLOW.md)
-- [Выбор локальной модели](MODEL-SELECTION.md)
+- [Выбор модели и требования к серверу](MODEL-SELECTION.md)
