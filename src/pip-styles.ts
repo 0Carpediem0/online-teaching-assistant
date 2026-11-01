@@ -1,0 +1,5 @@
+import { tokens } from './styles';
+export const pipStyles = `
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{${tokens};background:var(--bg);display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:15px 16px;background:var(--paper);border-bottom:1px solid var(--line)}header strong{font-size:14px;letter-spacing:-.2px}#status{font-size:10px;color:var(--green);background:var(--soft);padding:4px 8px;border-radius:20px}#feed{flex:1;min-height:0;overflow:auto;padding:14px;overflow-anchor:none}ol{list-style:none;padding:0;margin:0}li{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:12px 14px;margin-bottom:9px;overflow-wrap:anywhere}p{margin:0;white-space:pre-wrap;font-size:14px;line-height:1.6}.time{display:block;text-align:right;font-size:10px;color:var(--muted);margin-top:5px}small{display:block;color:var(--warn);font-size:10px;margin-bottom:5px}#empty{color:var(--muted);padding:30px 12px;text-align:center;font-size:13px}footer{font-size:10px;color:var(--muted);padding:9px 14px;border-top:1px solid var(--line)}[hidden]{display:none!important}
+`;
