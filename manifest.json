@@ -4,6 +4,8 @@
   "version": "0.1.0",
   "action": {"default_title":"Ассистент преподавателя", "default_popup":"popup.html"},
   "description": "Панель управления занятием в Яндекс Телемосте.",
+  "background": {"service_worker":"background.js"},
+  "host_permissions": ["http://127.0.0.1:8787/*"],
   "content_scripts": [{
     "matches": ["https://telemost.yandex.ru/*"],
     "js": ["content.js"],

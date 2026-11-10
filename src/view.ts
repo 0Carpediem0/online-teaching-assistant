@@ -6,8 +6,10 @@ export type ViewState = {
   active: boolean; ended: boolean; shown: boolean; history: boolean; busy: boolean;
   chat: ChatState; error: string; pip: boolean; pipPreferred: boolean;
   supported: boolean; messages: ObservedMessage[];
+  analysisBusy?: boolean; analysisError?: string; analysisPending?: number;
+  compiledQuestions?: { questionId: string; text: string; eventIds: string[] }[];
 };
-type Actions = { toggle(): void; start(): void; stop(): void; history(v: boolean): void; pip(v: boolean): void };
+type Actions = { toggle(): void; start(): void; stop(): void; history(v: boolean): void; pip(v: boolean): void; analyze(): void };
 
 export function createView(root: ShadowRoot | HTMLElement, actions: Actions, detached = false) {
   const doc = root.ownerDocument;
@@ -26,8 +28,11 @@ export function createView(root: ShadowRoot | HTMLElement, actions: Actions, det
       </div>
       <div class="section-head"><h2>Сообщения чата</h2><span id="count" class="counter"></span></div>
       <p id="empty"></p><ul id="messages" aria-label="Доступные сообщения"></ul>
+      <div class="section-head"><h2>Анализ вопросов</h2></div>
+      <button id="analyze" class="primary" type="button">Анализировать новые сообщения</button>
+      <p id="analysis-status" role="status"></p><ul id="questions" aria-label="Сводные вопросы"></ul>
       <p id="history-note" hidden>История может относиться к прошлым встречам.</p><p id="limit" hidden>Показаны последние 100 сообщений.</p>
-      <footer><details><summary>О данных занятия</summary><p>Сообщения хранятся в этой вкладке до её обновления или закрытия. Время обнаружения не равно времени отправки; история может быть неполной. AI-анализ и отчёт пока не подключены.</p></details></footer>
+      <footer><details><summary>О данных занятия</summary><p>Сообщения хранятся в этой вкладке до её обновления или закрытия. Время обнаружения не равно времени отправки; история может быть неполной. Анализ отправляет новые сообщения в локальный сервис на этом компьютере. Итоговый отчёт пока не подключён.</p></details></footer>
     </section>`;
   const get = <T extends HTMLElement = HTMLElement>(id: string) => root.querySelector<T>('#' + id)!;
   const notice = createNotice(root, 'error');
@@ -36,6 +41,7 @@ export function createView(root: ShadowRoot | HTMLElement, actions: Actions, det
   get('hide').onclick = actions.toggle;
   get('start').onclick = actions.start;
   get('stop').onclick = actions.stop;
+  get('analyze').onclick = actions.analyze;
   get<HTMLInputElement>('history').onchange = e => actions.history((e.target as HTMLInputElement).checked);
   get<HTMLInputElement>('pip').onchange = e => actions.pip((e.target as HTMLInputElement).checked);
   let messageKey = '';
@@ -64,6 +70,17 @@ export function createView(root: ShadowRoot | HTMLElement, actions: Actions, det
     } : undefined);
     get<HTMLInputElement>('history').checked = state.history;
     setText('count', `Новых за занятие: ${state.messages.filter(m => m.origin === 'observed').length}`);
+    get<HTMLButtonElement>('analyze').disabled = !state.analysisPending || Boolean(state.analysisBusy);
+    setText('analyze', state.analysisBusy ? 'Анализируем…' : `Анализировать новые сообщения (${state.analysisPending ?? 0})`);
+    setText('analysis-status', state.analysisError || (state.compiledQuestions?.length ? `Сводных вопросов: ${state.compiledQuestions.length}` : 'Сводных вопросов пока нет'));
+    const questions = get('questions');
+    const questionKey = JSON.stringify(state.compiledQuestions ?? []);
+    if (questions.dataset.key !== questionKey) {
+      questions.dataset.key = questionKey;
+      questions.replaceChildren(...(state.compiledQuestions ?? []).map(question => {
+        const item = doc.createElement('li'); item.textContent = `${question.text} · ${question.eventIds.length}`; return item;
+      }));
+    }
     const visible = state.messages.filter(m => state.history || m.origin === 'observed');
     setText('empty', visible.length ? '' : state.active ? 'Новых сообщений пока нет' : state.ended ? 'Во время занятия новых сообщений не обнаружено' : 'Здесь появятся сообщения занятия');
     get('empty').hidden = visible.length > 0;

@@ -18,7 +18,7 @@ async function send(command:string,value?:boolean){
   connectionNotice.render();view.render(state);app.hidden=false;status.hidden=true;
  } catch {disconnected('Откройте вкладку Телемоста. Если расширение обновлено, обновите страницу встречи.');}
 }
-const view=createView(app,{toggle:()=>window.close(),start:()=>void send('start'),stop:()=>void send('stop'),history:v=>void send('history',v),pip:v=>void send('pip',v)},true);
+const view=createView(app,{toggle:()=>window.close(),start:()=>void send('start'),stop:()=>void send('stop'),history:v=>void send('history',v),pip:v=>void send('pip',v),analyze:()=>void send('analyze')},true);
 void chrome.tabs.query({active:true,currentWindow:true}).then(tabs=>{tabId=tabs[0]?.id; if(tabId!==undefined)void send('state');else disconnected('Откройте вкладку Телемоста.');}).catch(()=>{disconnected('Не удалось подключиться. Откройте расширение заново.');});
 const timer=window.setInterval(()=>void send('state'),800);
 window.addEventListener('pagehide',()=>clearInterval(timer));
