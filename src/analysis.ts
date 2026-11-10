@@ -20,6 +20,12 @@ export interface AnalysisResponse {
   topics: { topicId: string; label: string; kind: 'question' | 'technical_issue'; eventIds: string[] }[];
 }
 export interface AnalysisClient { analyze(request: AnalysisRequest): Promise<AnalysisResponse> }
+export interface QuestionBucket { from: string; to: string; questionCount: number }
+export interface AnalysisSummary {
+  questionCount: number; technicalIssueCount: number; uncertainCount: number;
+  questionBuckets: QuestionBucket[];
+  technicalIssues: { eventId: string; text: string; platformTime: string }[];
+}
 
 export function parsePlatformTime(raw: string): number | null {
   const match = /^(\d{1,2}):(\d{2})$/.exec(raw.trim());
@@ -50,8 +56,39 @@ export class AnalysisSession {
   }
   getEvents(): ChatEvent[] { return [...this.events.values()].map(event => ({ ...event, platformTime: { ...event.platformTime } })); }
   getResults(): AnalysisResponse[] { return [...this.results.values()]; }
+  getSummary(): AnalysisSummary {
+    const kinds = new Map(this.getResults().flatMap(response => response.messageResults).map(result => [result.eventId, result.kind]));
+    const questionBuckets = new Map<number, number>();
+    const technicalIssues: AnalysisSummary['technicalIssues'] = [];
+    let questionCount = 0, technicalIssueCount = 0, uncertainCount = 0;
+    for (const event of this.events.values()) {
+      const kind = kinds.get(event.eventId);
+      if (kind === 'question') {
+        questionCount++;
+        const minute = event.platformTime.minuteOfDay;
+        if (minute !== null) {
+          const from = Math.floor(minute / 5) * 5;
+          questionBuckets.set(from, (questionBuckets.get(from) ?? 0) + 1);
+        }
+      } else if (kind === 'technical_issue') {
+        technicalIssueCount++;
+        technicalIssues.push({ eventId: event.eventId, text: event.text, platformTime: event.platformTime.raw });
+      } else if (kind === 'uncertain') uncertainCount++;
+    }
+    const time = (minute: number) => `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`;
+    return { questionCount, technicalIssueCount, uncertainCount, technicalIssues,
+      questionBuckets: [...questionBuckets].sort(([a], [b]) => a - b).map(([minute, count]) => ({
+        from: time(minute), to: time(minute + 5), questionCount: count
+      })) };
+  }
   prepareBatch(): AnalysisRequest | null {
-    const pending = [...this.events.values()].filter(event => event.processingStatus === 'pending');
+    const pending: ChatEvent[] = [];
+    let characters = 0;
+    for (const event of this.events.values()) {
+      if (event.processingStatus !== 'pending') continue;
+      if (pending.length >= 50 || (pending.length && characters + event.text.length > 12000)) break;
+      pending.push(event); characters += event.text.length;
+    }
     if (!pending.length) return null;
     for (const event of pending) event.processingStatus = 'in_flight';
     return { schemaVersion: '1.0', analysisId: crypto.randomUUID(),

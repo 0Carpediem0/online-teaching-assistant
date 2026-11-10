@@ -22,7 +22,8 @@ if (!context.teacherAssistantStarted) {
  };
  function snapshot(){return {active,ended,shown:true,history,busy,chat,error,pip:Boolean(pip),pipPreferred,supported:Boolean(api),messages,
   analysisBusy,analysisError,analysisPending:analysisSession?.getEvents().filter(e=>e.processingStatus==='pending').length??0,
-  compiledQuestions:analysisSession?.getResults().flatMap(r=>r.compiledQuestions)??[]};}
+  compiledQuestions:analysisSession?.getResults().flatMap(r=>r.compiledQuestions)??[],
+  analysisSummary:analysisSession?.getSummary()};}
  function render(){pipView?.render(snapshot());}
  chrome.runtime.onMessage.addListener((m,_sender,reply)=>{
   if(m.type==='teacher-analysis-snapshot'){reply({schemaVersion:'1.0',sessionId:analysisSession?.sessionId ?? null,events:analysisSession?.getEvents() ?? []});return;}
@@ -35,8 +36,8 @@ if (!context.teacherAssistantStarted) {
    void chrome.runtime.sendMessage({type:'teacher-run-analysis',request}).then((response:{ok:boolean;result?:AnalysisResponse;error?:string})=>{
     if(!response.ok||!response.result)throw new Error(response.error);
     session.accept(request,response.result);
-   }).catch(()=>{session.retry(request);analysisError='Анализ не выполнен. Проверьте локальный сервис и повторите.';})
-    .finally(()=>{analysisBusy=false;render();reply(snapshot());});
+   }).catch(()=>{session.retry(request);if(analysisSession===session)analysisError='Анализ не выполнен. Проверьте локальный сервис и повторите.';})
+    .finally(()=>{if(analysisSession===session){analysisBusy=false;render();}reply(snapshot());});
    return true;
   }
   if(m.command==='start' && !active){

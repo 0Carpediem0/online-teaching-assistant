@@ -3,6 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "scripts": { "typecheck": "tsc --noEmit", "build": "node scripts/build.mjs", "preview:build": "node scripts/build-preview.mjs", "server:build": "node scripts/build-server.mjs", "server:start": "node dist-server/index.js" },
+  "scripts": { "typecheck": "tsc --noEmit", "build": "node scripts/build.mjs", "preview:build": "node scripts/build-preview.mjs", "server:build": "node scripts/build-server.mjs", "server:start": "node dist-server/index.js", "check:offline": "node scripts/check-offline.mjs" },
   "devDependencies": { "typescript": "5.9.2", "esbuild": "0.27.7" }
 }

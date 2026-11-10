@@ -1,6 +1,7 @@
 import type { ChatState, ObservedMessage } from './adapter';
 import { styles } from './styles';
 import { createNotice } from './notice';
+import type { AnalysisSummary } from './analysis';
 
 export type ViewState = {
   active: boolean; ended: boolean; shown: boolean; history: boolean; busy: boolean;
@@ -8,6 +9,7 @@ export type ViewState = {
   supported: boolean; messages: ObservedMessage[];
   analysisBusy?: boolean; analysisError?: string; analysisPending?: number;
   compiledQuestions?: { questionId: string; text: string; eventIds: string[] }[];
+  analysisSummary?: AnalysisSummary;
 };
 type Actions = { toggle(): void; start(): void; stop(): void; history(v: boolean): void; pip(v: boolean): void; analyze(): void };
 
@@ -31,6 +33,8 @@ export function createView(root: ShadowRoot | HTMLElement, actions: Actions, det
       <div class="section-head"><h2>Анализ вопросов</h2></div>
       <button id="analyze" class="primary" type="button">Анализировать новые сообщения</button>
       <p id="analysis-status" role="status"></p><ul id="questions" aria-label="Сводные вопросы"></ul>
+      <h3>Вопросы по времени Телемоста</h3><ul id="question-buckets" aria-label="Вопросы по пятиминутным интервалам"></ul>
+      <h3>Технические проблемы</h3><ul id="technical-issues" aria-label="Технические проблемы"></ul>
       <p id="history-note" hidden>История может относиться к прошлым встречам.</p><p id="limit" hidden>Показаны последние 100 сообщений.</p>
       <footer><details><summary>О данных занятия</summary><p>Сообщения хранятся в этой вкладке до её обновления или закрытия. Время обнаружения не равно времени отправки; история может быть неполной. Анализ отправляет новые сообщения в локальный сервис на этом компьютере. Итоговый отчёт пока не подключён.</p></details></footer>
     </section>`;
@@ -79,6 +83,22 @@ export function createView(root: ShadowRoot | HTMLElement, actions: Actions, det
       questions.dataset.key = questionKey;
       questions.replaceChildren(...(state.compiledQuestions ?? []).map(question => {
         const item = doc.createElement('li'); item.textContent = `${question.text} · ${question.eventIds.length}`; return item;
+      }));
+    }
+    const buckets = get('question-buckets');
+    const bucketKey = JSON.stringify(state.analysisSummary?.questionBuckets ?? []);
+    if (buckets.dataset.key !== bucketKey) {
+      buckets.dataset.key = bucketKey;
+      buckets.replaceChildren(...(state.analysisSummary?.questionBuckets ?? []).map(bucket => {
+        const item = doc.createElement('li'); item.textContent = `${bucket.from}–${bucket.to}: ${bucket.questionCount}`; return item;
+      }));
+    }
+    const issues = get('technical-issues');
+    const issueKey = JSON.stringify(state.analysisSummary?.technicalIssues ?? []);
+    if (issues.dataset.key !== issueKey) {
+      issues.dataset.key = issueKey;
+      issues.replaceChildren(...(state.analysisSummary?.technicalIssues ?? []).map(issue => {
+        const item = doc.createElement('li'); item.textContent = `${issue.platformTime || 'Без времени'} · ${issue.text}`; return item;
       }));
     }
     const visible = state.messages.filter(m => state.history || m.origin === 'observed');

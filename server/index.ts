@@ -44,10 +44,10 @@ function validRequest(value: unknown): value is AnalysisRequest {
     typeof request.session.startedAt === 'string' && typeof request.session.timeZone === 'string' &&
     request.task?.type === 'classify_and_group_messages' && request.task.timeBucketMinutes === 5 &&
     Array.isArray(request.messages) && request.messages.length > 0 && request.messages.length <= 100 &&
-    new Set(request.messages.map(message => message.eventId)).size === request.messages.length &&
     request.messages.every(message => message && typeof message.eventId === 'string' && !!message.eventId &&
       Number.isInteger(message.revision) && message.revision > 0 && typeof message.text === 'string' &&
-      message.text.length > 0 && message.text.length <= 4000 && typeof message.platformTime === 'string');
+      message.text.length > 0 && message.text.length <= 4000 && typeof message.platformTime === 'string') &&
+    new Set(request.messages.map(message => message.eventId)).size === request.messages.length;
 }
 
 async function analyze(request: AnalysisRequest): Promise<AnalysisResponse> {
