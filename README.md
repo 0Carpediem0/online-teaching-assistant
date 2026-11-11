@@ -126,4 +126,5 @@ Popup расширения в тестовой встрече Телемоста
 - [Схема обработки данных](documentation/DATA-FLOW.md)
 - [Выбор модели и требования к серверу](documentation/MODEL-SELECTION.md)
 - [Бизнес-анализ](documentation/BUSINESS-ANALYSIS.md)
+- [Опрос преподавателей](documentation/TEACHER-SURVEY.md)
 - [Дизайн и проверка интерфейса](documentation/DESIGN.md)
