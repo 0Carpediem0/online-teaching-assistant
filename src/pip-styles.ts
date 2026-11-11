@@ -1,0 +1,4 @@
+export const pipStyles=`
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{--chat-bg:#f4f6f8;--chat-text:#17212b;--chat-muted:#667381;font:16px/1.5 system-ui,sans-serif;color:var(--chat-text);background:var(--chat-bg);display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:white;border-bottom:1px solid #dfe4e8}header strong{font-size:14px}#status{font-size:11px;color:var(--chat-muted)}#feed{flex:1;min-height:0;overflow:auto;padding:10px;overflow-anchor:none}ol{list-style:none;padding:0;margin:0}li{background:white;border:1px solid #e1e5e9;border-radius:8px;padding:10px 12px;margin-bottom:8px;overflow-wrap:anywhere}p{margin:0;white-space:pre-wrap}.time{display:block;text-align:right;font-size:11px;color:var(--chat-muted);margin-top:4px}#empty{color:var(--chat-muted);padding:12px;text-align:center;font-size:14px}[hidden]{display:none!important}
+`;

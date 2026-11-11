@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Ассистент преподавателя",
+  "version": "0.1.0",
+  "action": {"default_title":"Ассистент преподавателя", "default_popup":"popup.html"},
+  "description": "Панель управления занятием в Яндекс Телемосте.",
+  "content_scripts": [{
+    "matches": ["https://telemost.yandex.ru/*"],
+    "js": ["content.js"],
+    "run_at": "document_idle"
+  }]
+}
