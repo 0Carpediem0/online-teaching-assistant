@@ -109,6 +109,6 @@ Popup расширения в тестовой встрече Телемоста
 
 - [Паспорт проекта](documentation/PROJECT-PASSPORT.md)
 - [Схема обработки данных](documentation/DATA-FLOW.md)
-- [Выбор локальной модели](documentation/MODEL-SELECTION.md)
+- [Выбор модели и требования к серверу](documentation/MODEL-SELECTION.md)
 - [Бизнес-анализ](documentation/BUSINESS-ANALYSIS.md)
 - [Дизайн и проверка интерфейса](documentation/DESIGN.md)
