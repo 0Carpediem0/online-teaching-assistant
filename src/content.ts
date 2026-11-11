@@ -9,10 +9,10 @@ if (!context.teacherAssistantStarted) {
  const api=(window as Window & {documentPictureInPicture?:{requestWindow(o:{width:number;height:number}):Promise<Window>}}).documentPictureInPicture;
  const actions={
   toggle:()=>{shown=!shown;render();},
-  start:()=>{if(active)return;messages=[];active=true;ended=false;stop=new TelemostAdapter().observeChat(v=>{chat=v;render();},m=>{messages.push(m);render();});render();},
+  start:()=>{if(active)return;messages=[];error='';active=true;ended=false;stop=new TelemostAdapter().observeChat(v=>{chat=v;render();},m=>{messages.push(m);render();});render();},
   stop:()=>{stop?.();stop=undefined;active=false;ended=true;render();},
   history:(v:boolean)=>{history=v;render();},
-  pip:async(v:boolean)=>{if(!v){pipPreferred=false;pip?.close();return;}if(busy||pip||!api)return;busy=true;error='';render();try{
+  pip:async(v:boolean)=>{if(!v){pipPreferred=false;error='';pip?.close();render();return;}if(busy||pip||!api)return;busy=true;error='';render();try{
    const opened=await api.requestWindow({width:320,height:420});if(!pipPreferred){opened.close();return;}pip=opened;pip.document.title='Чат занятия';pipView=createChatView(pip.document);
    pip.addEventListener('pagehide',()=>{pip=undefined;pipView=undefined;pipPreferred=false;render();},{once:true});
   }catch{pipPreferred=false;error='Не удалось открыть окно. Вернитесь в Телемост и попробуйте ещё раз.';}finally{busy=false;render();}}

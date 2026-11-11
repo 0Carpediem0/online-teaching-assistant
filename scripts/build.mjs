@@ -9,4 +9,5 @@ await build({ entryPoints: ['src/content.ts'], bundle: true, outfile: 'dist/cont
 await copyFile('manifest.json', 'dist/manifest.json');
 await build({entryPoints:['src/popup.ts'],bundle:true,outfile:'dist/popup.js',format:'iife',target:'chrome120',minify:true});
 await copyFile('popup.html', 'dist/popup.html');
+await copyFile('popup.css', 'dist/popup.css');
 console.log('Built dist/');
