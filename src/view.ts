@@ -32,7 +32,7 @@ export function createView(root: ShadowRoot | HTMLElement, actions: Actions, det
       <p id="empty"></p><ul id="messages" aria-label="Доступные сообщения"></ul>
       <div class="section-head"><h2>Анализ вопросов</h2></div>
       <button id="analyze" class="primary" type="button">Анализировать новые сообщения</button>
-      <p id="analysis-status" role="status"></p><ul id="questions" aria-label="Сводные вопросы"></ul>
+      <p id="analysis-status" role="status"></p><ul id="questions" aria-label="Вопросы занятия"></ul>
       <h3>Вопросы по времени Телемоста</h3><ul id="question-buckets" aria-label="Вопросы по пятиминутным интервалам"></ul>
       <h3>Технические проблемы</h3><ul id="technical-issues" aria-label="Технические проблемы"></ul>
       <p id="history-note" hidden>История может относиться к прошлым встречам.</p><p id="limit" hidden>Показаны последние 100 сообщений.</p>
@@ -76,7 +76,7 @@ export function createView(root: ShadowRoot | HTMLElement, actions: Actions, det
     setText('count', `Новых за занятие: ${state.messages.filter(m => m.origin === 'observed').length}`);
     get<HTMLButtonElement>('analyze').disabled = !state.analysisPending || Boolean(state.analysisBusy);
     setText('analyze', state.analysisBusy ? 'Анализируем…' : `Анализировать новые сообщения (${state.analysisPending ?? 0})`);
-    setText('analysis-status', state.analysisError || (state.compiledQuestions?.length ? `Сводных вопросов: ${state.compiledQuestions.length}` : 'Сводных вопросов пока нет'));
+    setText('analysis-status', state.analysisError || (state.compiledQuestions?.length ? `Вопросов в списке: ${state.compiledQuestions.length}` : 'Вопросов пока нет'));
     const questions = get('questions');
     const questionKey = JSON.stringify(state.compiledQuestions ?? []);
     if (questions.dataset.key !== questionKey) {

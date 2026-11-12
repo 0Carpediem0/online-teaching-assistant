@@ -30,6 +30,7 @@ const response = { schemaVersion: '1.0', analysisId: request.analysisId,
 assert.throws(() => validateResponse(request, { ...response, analysisId: 'wrong' }));
 assert.throws(() => validateResponse(request, { ...response, compiledQuestions: [{ ...response.compiledQuestions[0], eventIds: ['unknown'] }] }));
 session.accept(request, response);
+assert.equal(session.getDisplayQuestions().length, 1);
 assert.deepEqual(session.getSummary(), {
   questionCount: 2, technicalIssueCount: 1, uncertainCount: 0,
   questionBuckets: [{ from: '10:40', to: '10:45', questionCount: 2 }],
@@ -40,4 +41,12 @@ const next = session.prepareBatch();
 assert.ok(next);
 session.retry(next);
 assert.deepEqual(session.prepareBatch().messages.map(item => item.eventId), ['later']);
+const fallback = new AnalysisSession();
+fallback.add(message('single-question', 'Что делать с заданием?', '10:52'));
+const fallbackRequest = fallback.prepareBatch();
+assert.ok(fallbackRequest);
+fallback.accept(fallbackRequest, { schemaVersion: '1.0', analysisId: fallbackRequest.analysisId,
+  messageResults: [{ eventId: 'single-question', revision: 1, kind: 'question', topicId: null, confidence: 0.8 }],
+  compiledQuestions: [], topics: [] });
+assert.deepEqual(fallback.getDisplayQuestions().map(question => question.text), ['Что делать с заданием?']);
 console.log('Offline analysis contract check passed');

@@ -22,7 +22,7 @@ if (!context.teacherAssistantStarted) {
  };
  function snapshot(){return {active,ended,shown:true,history,busy,chat,error,pip:Boolean(pip),pipPreferred,supported:Boolean(api),messages,
   analysisBusy,analysisError,analysisPending:analysisSession?.getEvents().filter(e=>e.processingStatus==='pending').length??0,
-  compiledQuestions:analysisSession?.getResults().flatMap(r=>r.compiledQuestions)??[],
+  compiledQuestions:analysisSession?.getDisplayQuestions()??[],
   analysisSummary:analysisSession?.getSummary()};}
  function render(){pipView?.render(snapshot());}
  chrome.runtime.onMessage.addListener((m,_sender,reply)=>{

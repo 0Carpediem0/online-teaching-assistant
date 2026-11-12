@@ -56,6 +56,19 @@ export class AnalysisSession {
   }
   getEvents(): ChatEvent[] { return [...this.events.values()].map(event => ({ ...event, platformTime: { ...event.platformTime } })); }
   getResults(): AnalysisResponse[] { return [...this.results.values()]; }
+  getDisplayQuestions(): AnalysisResponse['compiledQuestions'] {
+    const responses = this.getResults();
+    const compiled = responses.flatMap(response => response.compiledQuestions);
+    const covered = new Set(compiled.flatMap(question => question.eventIds));
+    const originals = responses.flatMap(response => response.messageResults)
+      .filter(result => result.kind === 'question' && !covered.has(result.eventId))
+      .map(result => {
+        const event = this.events.get(result.eventId)!;
+        return { questionId: `original:${event.eventId}`, text: event.text,
+          eventIds: [event.eventId], topicId: result.topicId };
+      });
+    return [...compiled, ...originals];
+  }
   getSummary(): AnalysisSummary {
     const kinds = new Map(this.getResults().flatMap(response => response.messageResults).map(result => [result.eventId, result.kind]));
     const questionBuckets = new Map<number, number>();
