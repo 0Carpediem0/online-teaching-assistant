@@ -17,6 +17,7 @@ export interface AnalysisResponse {
   schemaVersion: '1.0'; analysisId: string;
   messageResults: { eventId: string; revision: number; kind: MessageKind; topicId: string | null; confidence: number }[];
   compiledQuestions: { questionId: string; text: string; eventIds: string[]; topicId: string | null }[];
+  compiledTechnicalIssues: { issueId: string; text: string; eventIds: string[]; topicId: string | null }[];
   topics: { topicId: string; label: string; kind: 'question' | 'technical_issue'; eventIds: string[] }[];
 }
 export interface AnalysisClient { analyze(request: AnalysisRequest): Promise<AnalysisResponse> }
@@ -24,7 +25,6 @@ export interface QuestionBucket { from: string; to: string; questionCount: numbe
 export interface AnalysisSummary {
   questionCount: number; technicalIssueCount: number; uncertainCount: number;
   questionBuckets: QuestionBucket[];
-  technicalIssues: { eventId: string; text: string; platformTime: string }[];
 }
 
 export function parsePlatformTime(raw: string): number | null {
@@ -56,23 +56,11 @@ export class AnalysisSession {
   }
   getEvents(): ChatEvent[] { return [...this.events.values()].map(event => ({ ...event, platformTime: { ...event.platformTime } })); }
   getResults(): AnalysisResponse[] { return [...this.results.values()]; }
-  getDisplayQuestions(): AnalysisResponse['compiledQuestions'] {
-    const responses = this.getResults();
-    const compiled = responses.flatMap(response => response.compiledQuestions);
-    const covered = new Set(compiled.flatMap(question => question.eventIds));
-    const originals = responses.flatMap(response => response.messageResults)
-      .filter(result => result.kind === 'question' && !covered.has(result.eventId))
-      .map(result => {
-        const event = this.events.get(result.eventId)!;
-        return { questionId: `original:${event.eventId}`, text: event.text,
-          eventIds: [event.eventId], topicId: result.topicId };
-      });
-    return [...compiled, ...originals];
-  }
+  getDisplayQuestions(): AnalysisResponse['compiledQuestions'] { return this.getResults().flatMap(response => response.compiledQuestions); }
+  getDisplayTechnicalIssues(): AnalysisResponse['compiledTechnicalIssues'] { return this.getResults().flatMap(response => response.compiledTechnicalIssues); }
   getSummary(): AnalysisSummary {
     const kinds = new Map(this.getResults().flatMap(response => response.messageResults).map(result => [result.eventId, result.kind]));
     const questionBuckets = new Map<number, number>();
-    const technicalIssues: AnalysisSummary['technicalIssues'] = [];
     let questionCount = 0, technicalIssueCount = 0, uncertainCount = 0;
     for (const event of this.events.values()) {
       const kind = kinds.get(event.eventId);
@@ -85,11 +73,10 @@ export class AnalysisSession {
         }
       } else if (kind === 'technical_issue') {
         technicalIssueCount++;
-        technicalIssues.push({ eventId: event.eventId, text: event.text, platformTime: event.platformTime.raw });
       } else if (kind === 'uncertain') uncertainCount++;
     }
     const time = (minute: number) => `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`;
-    return { questionCount, technicalIssueCount, uncertainCount, technicalIssues,
+    return { questionCount, technicalIssueCount, uncertainCount,
       questionBuckets: [...questionBuckets].sort(([a], [b]) => a - b).map(([minute, count]) => ({
         from: time(minute), to: time(minute + 5), questionCount: count
       })) };
@@ -127,7 +114,8 @@ export function validateResponse(request: AnalysisRequest, value: unknown): asse
   if (!value || typeof value !== 'object') throw new Error('Некорректный ответ анализатора');
   const response = value as AnalysisResponse;
   if (response.schemaVersion !== '1.0' || response.analysisId !== request.analysisId ||
-    !Array.isArray(response.messageResults) || !Array.isArray(response.compiledQuestions) || !Array.isArray(response.topics))
+    !Array.isArray(response.messageResults) || !Array.isArray(response.compiledQuestions) ||
+    !Array.isArray(response.compiledTechnicalIssues) || !Array.isArray(response.topics))
     throw new Error('Неверная структура или идентификатор анализа');
   const ids = new Map(request.messages.map(message => [message.eventId, message.revision]));
   const seen = new Set<string>();
@@ -160,4 +148,21 @@ export function validateResponse(request: AnalysisRequest, value: unknown): asse
       grouped.add(id);
     }
   }
+  const expectedQuestions = new Set(response.messageResults.filter(result => result.kind === 'question').map(result => result.eventId));
+  if (grouped.size !== expectedQuestions.size) throw new Error('Не все вопросы сведены');
+  const issues = new Set<string>();
+  const groupedIssues = new Set<string>();
+  for (const issue of response.compiledTechnicalIssues) {
+    if (!issue || typeof issue.issueId !== 'string' || !issue.issueId || issues.has(issue.issueId) ||
+      typeof issue.text !== 'string' || !issue.text.trim() || !Array.isArray(issue.eventIds) || !issue.eventIds.length ||
+      !(issue.topicId === null || topics.has(issue.topicId))) throw new Error('Некорректная сводка технической проблемы');
+    issues.add(issue.issueId);
+    for (const id of issue.eventIds) {
+      if (groupedIssues.has(id) || response.messageResults.find(result => result.eventId === id)?.kind !== 'technical_issue')
+        throw new Error('Некорректная ссылка на техническую проблему');
+      groupedIssues.add(id);
+    }
+  }
+  const expectedIssues = new Set(response.messageResults.filter(result => result.kind === 'technical_issue').map(result => result.eventId));
+  if (groupedIssues.size !== expectedIssues.size) throw new Error('Не все технические проблемы сведены');
 }

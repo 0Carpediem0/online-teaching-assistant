@@ -9,6 +9,8 @@ export type ViewState = {
   supported: boolean; messages: ObservedMessage[];
   analysisBusy?: boolean; analysisError?: string; analysisPending?: number;
   compiledQuestions?: { questionId: string; text: string; eventIds: string[] }[];
+  compiledTechnicalIssues?: { issueId: string; text: string; eventIds: string[] }[];
+  analysisDueAt?: number;
   analysisSummary?: AnalysisSummary;
 };
 type Actions = { toggle(): void; start(): void; stop(): void; history(v: boolean): void; pip(v: boolean): void; analyze(): void };
@@ -31,7 +33,7 @@ export function createView(root: ShadowRoot | HTMLElement, actions: Actions, det
       <div class="section-head"><h2>Сообщения чата</h2><span id="count" class="counter"></span></div>
       <p id="empty"></p><ul id="messages" aria-label="Доступные сообщения"></ul>
       <div class="section-head"><h2>Анализ вопросов</h2></div>
-      <button id="analyze" class="primary" type="button">Анализировать новые сообщения</button>
+      <button id="analyze" class="primary" type="button">Анализировать сейчас</button>
       <p id="analysis-status" role="status"></p><ul id="questions" aria-label="Вопросы занятия"></ul>
       <h3>Вопросы по времени Телемоста</h3><ul id="question-buckets" aria-label="Вопросы по пятиминутным интервалам"></ul>
       <h3>Технические проблемы</h3><ul id="technical-issues" aria-label="Технические проблемы"></ul>
@@ -75,8 +77,8 @@ export function createView(root: ShadowRoot | HTMLElement, actions: Actions, det
     get<HTMLInputElement>('history').checked = state.history;
     setText('count', `Новых за занятие: ${state.messages.filter(m => m.origin === 'observed').length}`);
     get<HTMLButtonElement>('analyze').disabled = !state.analysisPending || Boolean(state.analysisBusy);
-    setText('analyze', state.analysisBusy ? 'Анализируем…' : `Анализировать новые сообщения (${state.analysisPending ?? 0})`);
-    setText('analysis-status', state.analysisError || (state.compiledQuestions?.length ? `Вопросов в списке: ${state.compiledQuestions.length}` : 'Вопросов пока нет'));
+    setText('analyze', state.analysisBusy ? 'Анализируем…' : `Анализировать сейчас (${state.analysisPending ?? 0})`);
+    setText('analysis-status', state.analysisError || (state.analysisBusy ? 'Идёт анализ сообщений' : state.analysisDueAt ? 'Автоматический анализ через 5 минут после первого сообщения' : state.compiledQuestions?.length ? `Обобщённых вопросов: ${state.compiledQuestions.length}` : 'Проанализированных вопросов пока нет'));
     const questions = get('questions');
     const questionKey = JSON.stringify(state.compiledQuestions ?? []);
     if (questions.dataset.key !== questionKey) {
@@ -94,11 +96,11 @@ export function createView(root: ShadowRoot | HTMLElement, actions: Actions, det
       }));
     }
     const issues = get('technical-issues');
-    const issueKey = JSON.stringify(state.analysisSummary?.technicalIssues ?? []);
+    const issueKey = JSON.stringify(state.compiledTechnicalIssues ?? []);
     if (issues.dataset.key !== issueKey) {
       issues.dataset.key = issueKey;
-      issues.replaceChildren(...(state.analysisSummary?.technicalIssues ?? []).map(issue => {
-        const item = doc.createElement('li'); item.textContent = `${issue.platformTime || 'Без времени'} · ${issue.text}`; return item;
+      issues.replaceChildren(...(state.compiledTechnicalIssues ?? []).map(issue => {
+        const item = doc.createElement('li'); item.textContent = `${issue.text} · ${issue.eventIds.length}`; return item;
       }));
     }
     const visible = state.messages.filter(m => state.history || m.origin === 'observed');
