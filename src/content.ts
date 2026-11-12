@@ -36,7 +36,14 @@ if (!context.teacherAssistantStarted) {
    void chrome.runtime.sendMessage({type:'teacher-run-analysis',request}).then((response:{ok:boolean;result?:AnalysisResponse;error?:string})=>{
     if(!response.ok||!response.result)throw new Error(response.error);
     session.accept(request,response.result);
-   }).catch(()=>{session.retry(request);if(analysisSession===session)analysisError='Анализ не выполнен. Проверьте локальный сервис и повторите.';})
+   }).catch((failure:Error)=>{session.retry(request);if(analysisSession===session){
+    const reason=failure.message;
+    analysisError=reason==='invalid_request'?'Сервис отклонил пакет сообщений (400).':
+      reason==='invalid_model_json'||reason==='invalid_model_response'?'Модель вернула ответ не по схеме. Повторите анализ.':
+      reason==='model_timeout'||reason==='request_timeout'?'Модель не ответила за 2 минуты. Повторите анализ меньшим пакетом.':
+      reason==='ollama_unavailable'||reason==='ollama_http_error'?'Ollama недоступна или не нашла модель. Проверьте терминал сервиса.':
+      'Локальный сервис недоступен или ответ не принят. Проверьте терминал и повторите.';
+   }})
     .finally(()=>{if(analysisSession===session){analysisBusy=false;render();}reply(snapshot());});
    return true;
   }

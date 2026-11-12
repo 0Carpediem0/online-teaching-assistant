@@ -85,7 +85,12 @@ const server = createServer(async (req, res) => {
     res.writeHead(200).end(JSON.stringify(result));
   } catch (error) {
     const code = error instanceof Error && error.message === 'request_too_large' ? 413 : 502;
-    res.writeHead(code).end(JSON.stringify({ error: code === 413 ? 'request_too_large' : 'analysis_failed' }));
+    const reason = code === 413 ? 'request_too_large' :
+      error instanceof Error && error.name === 'TimeoutError' ? 'model_timeout' :
+      error instanceof SyntaxError ? 'invalid_model_json' :
+      error instanceof Error && error.message.startsWith('Ollama HTTP ') ? 'ollama_http_error' :
+      error instanceof TypeError ? 'ollama_unavailable' : 'invalid_model_response';
+    res.writeHead(code).end(JSON.stringify({ error: reason }));
   }
 });
 server.listen(port, host, () => process.stdout.write(`Analysis API listening on ${host}:${port}\n`));

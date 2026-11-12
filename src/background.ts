@@ -7,8 +7,12 @@ chrome.runtime.onMessage.addListener((message, _sender, reply) => {
     method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify(request), signal: AbortSignal.timeout(125_000)
   }).then(async response => {
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({})) as { error?: string };
+      reply({ ok: false, error: payload.error ?? `http_${response.status}` });
+      return;
+    }
     reply({ ok: true, result: await response.json() });
-  }).catch(() => reply({ ok: false, error: 'Локальный анализатор недоступен или вернул ошибку.' }));
+  }).catch(error => reply({ ok: false, error: error?.name === 'TimeoutError' ? 'request_timeout' : 'service_unavailable' }));
   return true;
 });
