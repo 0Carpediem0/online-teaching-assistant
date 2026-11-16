@@ -16,16 +16,15 @@ const view = createView(root, {
   start() { state = { ...state, active: true, ended: false, chat: 'available', error: '', messages: [], pip: state.pipPreferred }; render(); },
   stop() { state.active = false; state.ended = true; render(); },
   history(value) { state.history = value; render(); },
-  pip(value) { state.pipPreferred = value; state.pip = state.active && value; if (value) state.error = ''; render(); }
+  pip(value) { state.pipPreferred = value; state.pip = state.active && value; if (value) state.error = ''; render(); },
+  openChat() { state.pip = true; render(); }
 }, true);
 const connectionNotice=createNotice(root, 'connection-notice');
 const connectionScreen=document.createElement('div');
 connectionScreen.className='connection-preview';
 connectionScreen.hidden=true;
-connectionScreen.innerHTML='<div class="brand"><span class="brand-mark" aria-hidden="true">а</span><strong>Ассистент</strong></div><h1>Откройте встречу</h1><p>Подключитесь к Яндекс Телемосту и откройте расширение.</p>';
-const connectionStyle=document.createElement('style');
-connectionStyle.textContent='.connection-preview{box-sizing:border-box;min-height:360px;padding:24px;background:var(--bg);color:var(--ink);font:13px/1.5 system-ui}.connection-preview h1{font-size:22px}.connection-preview p{color:var(--muted)}';
-root.append(connectionStyle,connectionScreen);
+connectionScreen.innerHTML='<h1>Откройте встречу</h1><p>Подключитесь к Яндекс Телемосту и откройте расширение.</p>';
+root.append(connectionScreen);
 let disconnected=false;
 function render() {
   view.render(state); pipView.render(state);
