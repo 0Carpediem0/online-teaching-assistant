@@ -6,7 +6,15 @@
   "description": "Панель управления занятием в Яндекс Телемосте.",
   "background": {"service_worker":"background.js"},
   "host_permissions": ["http://127.0.0.1:8787/*"],
+  "minimum_chrome_version": "120",
   "content_scripts": [{
+    "matches": ["https://telemost.yandex.ru/*"],
+    "js": ["device-probe.js"],
+    "run_at": "document_start",
+    "world": "MAIN",
+    "all_frames": true,
+    "match_origin_as_fallback": true
+  }, {
     "matches": ["https://telemost.yandex.ru/*"],
     "js": ["content.js"],
     "run_at": "document_idle"
