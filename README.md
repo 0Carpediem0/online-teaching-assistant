@@ -131,4 +131,5 @@ Popup расширения в тестовой встрече Телемоста
 - [Выбор модели и требования к серверу](documentation/MODEL-SELECTION.md)
 - [Бизнес-анализ](documentation/BUSINESS-ANALYSIS.md)
 - [Опрос преподавателей](documentation/TEACHER-SURVEY.md)
+- [Опрос студентов](documentation/STUDENT-SURVEY.md)
 - [Дизайн и проверка интерфейса](documentation/DESIGN.md)
