@@ -1,3 +1,5 @@
+import { checkDevices, readDevices } from './devices';
+import type { DeviceCheck } from './device-types';
 import { TelemostAdapter, type ObservedMessage, type ChatState } from './adapter';
 import { createChatView } from './pip-view';
 import { AnalysisSession, type AnalysisResponse } from './analysis';
@@ -8,6 +10,18 @@ if (!context.teacherAssistantStarted) {
  let chat:ChatState='unavailable', messages:ObservedMessage[]=[],stop:(()=>void)|undefined;
  let analysisSession:AnalysisSession|undefined;
  let analysisBusy=false, analysisError='';
+ let deviceCheck:DeviceCheck={phase:'idle'};
+ let deviceState = JSON.stringify(readDevices());
+ const deviceTimer = window.setInterval(() => {
+  const next = JSON.stringify(readDevices());
+  if (deviceCheck.phase === 'done' && (next !== deviceState || Date.now() - (deviceCheck.checkedAt || 0) > 30000)) deviceCheck.stale = true;
+  deviceState = next;
+ }, 500);
+ window.addEventListener('message', event => {
+  if (event.origin !== location.origin || event.data?.type !== 'teacher-device-changed') return;
+  if (deviceCheck.phase === 'done') deviceCheck.stale = true;
+ });
+ window.addEventListener('pagehide', () => clearInterval(deviceTimer), {once:true});
  let pip:Window|undefined,pipView:ReturnType<typeof createChatView>|undefined;
  const api=(window as Window & {documentPictureInPicture?:{requestWindow(o:{width:number;height:number}):Promise<Window>}}).documentPictureInPicture;
  const actions={
@@ -20,7 +34,7 @@ if (!context.teacherAssistantStarted) {
    pip.addEventListener('pagehide',()=>{pip=undefined;pipView=undefined;pipPreferred=false;render();},{once:true});
   }catch{pipPreferred=false;error='Не удалось открыть окно. Вернитесь в Телемост и попробуйте ещё раз.';}finally{busy=false;render();}}
  };
- function snapshot(){return {active,ended,shown:true,history,busy,chat,error,pip:Boolean(pip),pipPreferred,supported:Boolean(api),messages,
+ function snapshot(){return {deviceCheck,active,ended,shown:true,history,busy,chat,error,pip:Boolean(pip),pipPreferred,supported:Boolean(api),messages,
   analysisBusy,analysisError,analysisPending:analysisSession?.getEvents().filter(e=>e.processingStatus==='pending').length??0,
   compiledQuestions:analysisSession?.getResults().flatMap(r=>r.compiledQuestions)??[],
   analysisSummary:analysisSession?.getSummary()};}
@@ -28,6 +42,15 @@ if (!context.teacherAssistantStarted) {
  chrome.runtime.onMessage.addListener((m,_sender,reply)=>{
   if(m.type==='teacher-analysis-snapshot'){reply({schemaVersion:'1.0',sessionId:analysisSession?.sessionId ?? null,events:analysisSession?.getEvents() ?? []});return;}
   if(m.type!=='teacher-command')return;
+  if(m.command==='check-devices'){
+   if(deviceCheck.phase!=='running'){
+    deviceCheck={phase:'running'};
+    void checkDevices(level=>{if(deviceCheck.phase==='running')deviceCheck.level=level;}).then(result=>{deviceState=JSON.stringify(readDevices());deviceCheck=result;}).catch(()=>{
+     deviceCheck={phase:'done',checkedAt:Date.now(),microphone:{tone:'unknown',text:'Проверка недоступна. Обновите страницу встречи'},camera:{tone:'unknown',text:'Данные камеры недоступны'}};
+    });
+   }
+   reply(snapshot());return;
+  }
   if(m.command==='analyze'){
    if(analysisBusy||!analysisSession){reply(snapshot());return;}
    const session=analysisSession, request=session.prepareBatch();
