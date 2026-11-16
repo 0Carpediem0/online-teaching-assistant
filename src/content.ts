@@ -15,20 +15,32 @@ if (!context.teacherAssistantStarted) {
   pip:async(v:boolean)=>{if(!v){pipPreferred=false;error='';pip?.close();render();return;}if(busy||pip||!api)return;busy=true;error='';render();try{
    const opened=await api.requestWindow({width:320,height:420});if(!pipPreferred){opened.close();return;}pip=opened;pip.document.title='Чат занятия';pipView=createChatView(pip.document);
    pip.addEventListener('pagehide',()=>{pip=undefined;pipView=undefined;pipPreferred=false;render();},{once:true});
-  }catch{pipPreferred=false;error='Не удалось открыть окно. Вернитесь в Телемост и попробуйте ещё раз.';}finally{busy=false;render();}}
+  }catch{pipPreferred=false;error='Не удалось открыть окно. Вернитесь в Телемост и попробуйте ещё раз.';}finally{busy=false;render();}},
+  chat:async()=>{
+   if(pip){pip.focus();return;}
+   if(busy)return;
+   if(!api){error='Окно чата недоступно в этом браузере.';render();return;}
+   busy=true;error='';render();
+   try{
+    const opened=await api.requestWindow({width:320,height:420});
+    pip=opened;pip.document.title='Чат занятия';pipView=createChatView(pip.document);
+    pip.addEventListener('pagehide',()=>{pip=undefined;pipView=undefined;render();},{once:true});
+   }catch{error='Не удалось открыть окно чата. Попробуйте ещё раз.';}
+   finally{busy=false;render();}
+  }
  };
  function snapshot(){return {active,ended,shown:true,history,busy,chat,error,pip:Boolean(pip),pipPreferred,supported:Boolean(api),messages};}
  function render(){pipView?.render(snapshot());}
  chrome.runtime.onMessage.addListener((m,_sender,reply)=>{
   if(m.type!=='teacher-command')return;
   if(m.command==='start' && !active){
-   // Request before any asynchronous work, in the incoming user-gesture task.
    const opening=pipPreferred?actions.pip(true):Promise.resolve();
    actions.start();void opening.then(()=>reply(snapshot()));return true;
   }
   if(m.command==='stop')actions.stop();
   if(m.command==='history')actions.history(m.value===true);
   if(m.command==='pip'){pipPreferred=m.value===true;if(active){void actions.pip(pipPreferred).then(()=>reply(snapshot()));return true;}}
+  if(m.command==='chat'){void actions.chat().then(()=>reply(snapshot()));return true;}
   reply(snapshot());
  });
  window.addEventListener('pagehide',()=>{actions.stop();pip?.close();});render();
