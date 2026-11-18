@@ -16,7 +16,8 @@ const view = createView(root, {
   start() { state = { ...state, active: true, ended: false, chat: 'available', error: '', messages: [], pip: state.pipPreferred }; render(); },
   stop() { state.active = false; state.ended = true; render(); },
   history(value) { state.history = value; render(); },
-  pip(value) { state.pipPreferred = value; state.pip = state.active && value; if (value) state.error = ''; render(); }
+  pip(value) { state.pipPreferred = value; state.pip = state.active && value; if (value) state.error = ''; render(); },
+  analyze() { state.analysisError = 'В макете анализатор не подключён.'; render(); }
 }, true);
 const connectionNotice=createNotice(root, 'connection-notice');
 const connectionScreen=document.createElement('div');
