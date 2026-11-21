@@ -28,7 +28,7 @@ if (!context.teacherAssistantStarted) {
  const actions={
   toggle:()=>{shown=!shown;render();},
   start:()=>{if(active)return;clearAnalysisTimer();messages=[];analysisSession=new AnalysisSession();analysisBusy=false;analysisError='';error='';active=true;ended=false;stop=new TelemostAdapter().observeChat(v=>{chat=v;render();},m=>{messages.push(m);if(analysisSession?.add(m))scheduleAnalysis();render();});render();},
-  stop:()=>{stop?.();stop=undefined;active=false;ended=true;render();},
+  stop:()=>{clearAnalysisTimer();stop?.();stop=undefined;active=false;ended=true;render();},
   history:(v:boolean)=>{history=v;render();},
   pip:async(v:boolean)=>{if(!v){pipPreferred=false;error='';pip?.close();render();return;}if(busy||pip||!api)return;busy=true;error='';render();try{
    const opened=await api.requestWindow({width:320,height:420});if(!pipPreferred){opened.close();return;}pip=opened;pip.document.title='Чат занятия';pipView=createChatView(pip.document);
@@ -37,12 +37,12 @@ if (!context.teacherAssistantStarted) {
  };
  function clearAnalysisTimer(){if(analysisTimer!==undefined)window.clearTimeout(analysisTimer);analysisTimer=undefined;analysisDueAt=undefined;}
  function scheduleAnalysis(){
-  if(analysisTimer!==undefined)return;
+  if(!active||analysisTimer!==undefined)return;
   analysisDueAt=Date.now()+300_000;
   analysisTimer=window.setTimeout(()=>{analysisTimer=undefined;analysisDueAt=undefined;void runAnalysis();},300_000);
  }
  function runAnalysis(reply?:(value:unknown)=>void){
-  if(analysisBusy||!analysisSession){reply?.(snapshot());return;}
+  if(!active||analysisBusy||!analysisSession){reply?.(snapshot());return;}
   const session=analysisSession,request=session.prepareBatch();
   if(!request){reply?.(snapshot());return;}
   clearAnalysisTimer();analysisBusy=true;analysisError='';render();
