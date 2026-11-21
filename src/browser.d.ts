@@ -5,3 +5,4 @@ declare const chrome: {
   sendMessage(id:number,message:{type:string;command:string;value?:boolean},options:{frameId:number}):Promise<unknown>;
  };
 };
+declare const __ANALYSIS_API_URL__: string;

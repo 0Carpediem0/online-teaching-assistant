@@ -3,9 +3,10 @@ import type { AnalysisRequest } from './analysis';
 chrome.runtime.onMessage.addListener((message, _sender, reply) => {
   if (message.type !== 'teacher-run-analysis') return;
   const request = message.request as AnalysisRequest;
-  void fetch('http://127.0.0.1:8787/v1/analyze', {
+  void fetch(__ANALYSIS_API_URL__, {
     method: 'POST', headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(request), signal: AbortSignal.timeout(125_000)
+    body: JSON.stringify(request), signal: AbortSignal.timeout(125_000),
+    credentials: 'omit', redirect: 'error'
   }).then(async response => {
     if (!response.ok) {
       const payload = await response.json().catch(() => ({})) as { error?: string };
