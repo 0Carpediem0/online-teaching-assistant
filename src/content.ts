@@ -52,8 +52,11 @@ if (!context.teacherAssistantStarted) {
   }).catch((failure:Error)=>{session.retry(request);if(analysisSession===session){
    const reason=failure.message;
    analysisError=reason==='invalid_request'?'Сервис отклонил пакет сообщений (400).':
+     reason==='unauthorized'?'Не принят ключ доступа к серверу. Проверьте параметры расширения.':
      reason==='invalid_model_json'||reason==='invalid_model_response'?'Модель вернула ответ не по схеме. Повторите анализ.':
      reason==='model_timeout'||reason==='request_timeout'?'Модель не ответила за 2 минуты. Повторите анализ меньшим пакетом.':
+     reason==='model_provider_http_error'?'API модели вернул ошибку. Проверьте ключ, баланс и выбранную модель.':
+     reason==='model_provider_unavailable'?'Не удалось связаться с API модели. Проверьте сеть и журналы backend.':
      reason==='ollama_unavailable'||reason==='ollama_http_error'?'Ollama недоступна или не нашла модель. Проверьте терминал сервиса.':
      'Локальный сервис недоступен или ответ не принят. Проверьте терминал и повторите.';
   }}).finally(()=>{if(analysisSession===session){analysisBusy=false;
