@@ -5,7 +5,7 @@ import { createNotice } from '../src/notice';
 
 const message = (text: string, origin: ObservedMessage['origin'] = 'observed', own = false): ObservedMessage => ({ eventId: crypto.randomUUID(), text, platformTime: '10:42', observedAt: new Date().toISOString(), own, authorEvidence: 'unknown', origin });
 const samples = () => [message('Материалы к прошлой паре выложены в курсе.', 'initial'), message('Можно ещё раз объяснить разницу между JOIN и UNION?'), message('Пример запроса добавлю после занятия.', 'observed', true), message('Плохо слышно последние несколько минут.')];
-let state: ViewState = { active: true, ended: false, shown: true, history: false, busy: false, chat: 'available', error: '', pip: true, pipPreferred: true, supported: true, messages: samples() };
+let state: ViewState = { active: true, ended: false, shown: true, history: false, busy: false, chat: 'available', error: '', pip: true, pipPreferred: true, supported: true, messages: samples(), analysisPending:3 };
 const root = document.querySelector<HTMLElement>('#popup')!.attachShadow({ mode: 'open' });
 const frame = document.querySelector<HTMLIFrameElement>('#pip-preview')!;
 const pipDoc = frame.contentDocument!;
@@ -13,11 +13,13 @@ pipDoc.documentElement.lang = 'ru';
 const pipView = createChatView(pipDoc);
 const view = createView(root, {
   toggle() {},
-  start() { state = { ...state, active: true, ended: false, chat: 'available', error: '', messages: [], pip: state.pipPreferred }; render(); },
+  openChat() { state.pip = true; render(); },
+  checkDevices() { state.deviceCheck = {phase:'done',checkedAt:Date.now(),microphone:{tone:'ok',text:'Демонстрация: микрофон работает'},camera:{tone:'warning',text:'Демонстрация: камера выключена'}}; render(); },
+  start() { state = { ...state, active: true, ended: false, chat: 'available', error: '', messages: [], compiledQuestions:[], compiledTechnicalIssues:[], analysisPending:0, analysisSummary:undefined, analysisError:'', pip: state.pipPreferred }; render(); },
   stop() { state.active = false; state.ended = true; render(); },
   history(value) { state.history = value; render(); },
   pip(value) { state.pipPreferred = value; state.pip = state.active && value; if (value) state.error = ''; render(); },
-  analyze() { state.analysisError = 'В макете анализатор не подключён.'; render(); }
+  analyze() { state.analysisPending = 0; state.analysisError = ''; state.analysisSummary = {questionCount:2,technicalIssueCount:1,uncertainCount:0,questionBuckets:[{from:'10:40',to:'10:45',questionCount:2}]}; state.compiledQuestions = [{questionId:'demo-question',text:'Чем JOIN отличается от UNION?',eventIds:['demo-1','demo-2']}]; state.compiledTechnicalIssues = [{issueId:'demo-issue',text:'Студенты жалуются на тихий звук',eventIds:['demo-3']}]; render(); }
 }, true);
 const connectionNotice=createNotice(root, 'connection-notice');
 const connectionScreen=document.createElement('div');
@@ -43,14 +45,20 @@ function render() {
 }
 document.querySelectorAll<HTMLButtonElement>('[data-scene]').forEach(button => button.onclick = () => {
   const scene = button.dataset.scene;
+  root.querySelector<HTMLElement>('#main-screen')!.hidden=false;
+  root.querySelector<HTMLElement>('#diagnostic-screen')!.hidden=true;
+  root.querySelector<HTMLElement>('#chat-screen')!.hidden=true;
   disconnected=scene==='disconnected';
-  state = { ...state, active: scene !== 'ready' && scene !== 'ended', ended: scene === 'ended', messages: scene === 'ready' ? [] : samples(), chat: scene === 'unavailable' ? 'unavailable' : 'available', history: false, error: scene === 'error' ? 'Не удалось открыть окно. Вернитесь в Телемост и попробуйте ещё раз.' : '', supported: scene !== 'unsupported', pip: scene !== 'ready' && scene !== 'unsupported' && scene !== 'error', pipPreferred: scene !== 'ready' && scene !== 'unsupported' && scene !== 'error' };
-  render(); button.setAttribute('aria-pressed', 'true');
+  state = { ...state, compiledQuestions:[], compiledTechnicalIssues:[], analysisSummary:undefined, analysisBusy:scene==='analyzing', analysisError:scene==='analysis-error'?'Локальный сервис недоступен. Проверьте терминал и повторите анализ.':'', analysisPending:scene==='ready'?0:3, active: scene !== 'ready' && scene !== 'ended', ended: scene === 'ended', messages: scene === 'ready' ? [] : samples(), chat: scene === 'unavailable' ? 'unavailable' : 'available', history: false, error: scene === 'error' ? 'Не удалось открыть окно. Вернитесь в Телемост и попробуйте ещё раз.' : '', supported: scene !== 'unsupported', pip: scene !== 'ready' && scene !== 'unsupported' && scene !== 'error', pipPreferred: scene !== 'ready' && scene !== 'unsupported' && scene !== 'error' };
+  render();
+  if(scene==='diagnostics') root.querySelector<HTMLButtonElement>('#open-diagnostics')!.click();
+  if(scene==='results') root.querySelector<HTMLButtonElement>('#analyze')!.click();
+  button.setAttribute('aria-pressed', 'true');
 });
 document.querySelector<HTMLFormElement>('#compose')!.onsubmit = event => {
   event.preventDefault(); const input = document.querySelector<HTMLInputElement>('#sample-text')!;
   if (disconnected || !state.active || !input.value.trim()) return;
-  state.messages.push(message(input.value.trim())); input.value = ''; render();
+  state.messages.push(message(input.value.trim())); state.analysisPending = (state.analysisPending ?? 0) + 1; input.value = ''; render();
   document.querySelector('#demo-status')!.textContent = 'Тестовое сообщение добавлено в макет';
 };
 render(); document.querySelector('[data-scene="active"]')!.setAttribute('aria-pressed', 'true');

@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ассистент · просмотр дизайна</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#e9ede6;color:#20342d;font:14px/1.5 'Segoe UI',system-ui,sans-serif}.review{max-width:1240px;margin:0 auto;padding:35px 40px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #cbd4c9;padding-bottom:20px}.label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#536d5c}.review h1{font-size:34px;letter-spacing:-1.3px;font-weight:500;line-height:1.2;margin:9px 0}.top p{color:#56695c;font-size:12px;margin:0}.iteration{font-size:11px;border:1px solid #bdcabb;padding:7px 12px;border-radius:20px;white-space:nowrap}.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:22px 0}.toolbar span{font-size:11px;color:#526457;margin-right:5px}.toolbar button,.compose button{font:inherit;font-size:11px;background:transparent;border:1px solid #bdcabb;border-radius:7px;padding:7px 11px;cursor:pointer;color:#20342d}.toolbar button[aria-pressed=true]{background:#246a51;color:white;border-color:#246a51}.toolbar button:hover,.compose button:hover{background:#d6e2d3}.toolbar button:focus-visible,input:focus-visible{outline:3px solid #246a51;outline-offset:3px}.boards{display:grid;grid-template-columns:640px minmax(280px,1fr);gap:40px;align-items:start}.board-label{display:flex;gap:12px;align-items:center;margin:0 0 12px;font-size:11px;color:#526457}.board-label b{font-weight:500;color:#20342d}.number{font-size:10px;border:1px solid #bdcabb;padding:2px 7px;border-radius:20px}.frame{position:relative;transform:translateZ(0);background:#f6f8f4;border:1px solid #cbd4c9;box-shadow:0 14px 35px #354c3610;border-radius:24px;overflow:hidden}#popup{display:block}iframe{width:100%;height:330px;border:0;display:block}.stage{background:#dce4d8;border:1px solid #cbd4c9;border-radius:24px;padding:20px;position:relative}.slide-label{font-size:9px;letter-spacing:1.6px;color:#566d59}.slide-title{font-size:26px;line-height:1.25;letter-spacing:-.7px;font-weight:500;margin:12px 0 24px;max-width:240px}.pip-frame{max-width:340px;margin-left:auto;border-radius:28px;overflow:hidden;box-shadow:0 8px 24px #30433315;background:#f6f8f4}.windowbar{display:flex;justify-content:space-between;background:white;border-bottom:1px solid #e1e7e1;padding:7px 12px;font-size:9px;color:#65746c}.annotation{color:#56695c;font-size:11px;line-height:1.6;margin:13px 0;max-width:365px}.compose{display:flex;gap:7px;margin-top:12px}.compose input{min-width:0;flex:1;background:#f6f8f4;border:1px solid #bdcabb;border-radius:7px;padding:9px;font:inherit;font-size:11px}.bottom{display:flex;justify-content:space-between;gap:12px;font-size:10px;color:#56695c;margin-top:24px;border-top:1px solid #cbd4c9;padding-top:14px}.pip-off{padding:35px 15px;color:#65746c;font-size:12px;text-align:center}[hidden]{display:none!important}@media(max-width:1100px){.review{padding:24px}.boards{gap:25px;grid-template-columns:640px minmax(240px,1fr)}}@media(max-width:1000px){.boards{display:flex;flex-direction:column;align-items:center}.boards>div{width:100%;max-width:640px}.top{align-items:start}.review h1{font-size:26px}.iteration{display:none}.review{padding:20px 14px}.bottom{flex-wrap:wrap}}@media(max-width:400px){.boards>div{max-width:100%}}
+</style></head><body><main class="review">
+<div class="top"><h1>Панель преподавателя и сообщения рядом с презентацией</h1></div>
+<nav class="toolbar" aria-label="Состояния макета"><span>Посмотреть сценарий</span><button data-scene="ready" aria-pressed="false">До пары</button><button data-scene="active" aria-pressed="true">Во время пары</button><button data-scene="ended" aria-pressed="false">После пары</button><button data-scene="unavailable" aria-pressed="false">Чат недоступен</button><button data-scene="disconnected" aria-pressed="false">Нет подключения</button><button data-scene="error" aria-pressed="false">Ошибка окна</button><button data-scene="unsupported" aria-pressed="false">Без PiP</button><button data-scene="results" aria-pressed="false">Результаты ИИ</button><button data-scene="analyzing" aria-pressed="false">Идёт анализ</button><button data-scene="analysis-error" aria-pressed="false">Ошибка анализа</button><button data-scene="diagnostics" aria-pressed="false">Диагностика</button></nav>
+<div class="boards"><div><p class="board-label"><span class="number">01</span><b>Управление занятием</b><span>popup · 640 px</span></p><div class="frame"><div id="popup"></div></div><p class="annotation">Слева — статус занятия и две квадратные настройки. Справа — уведомления ассистента и кнопка «Открыть чат».</p></div>
+<div><p class="board-label"><span class="number">02</span><b>Чат рядом с материалом</b></p><div class="stage"><div class="slide-label">ПРИМЕР ПРЕЗЕНТАЦИИ</div><div class="slide-title">Базы данных.<br>От связей к запросам</div><div class="pip-frame"><div class="windowbar"><span>Отдельное окно чата</span><span aria-hidden="true">− &nbsp; □ &nbsp; ×</span></div><iframe id="pip-preview" title="Макет окна чата"></iframe><div id="pip-off" class="pip-off" hidden>Включите «Поверх презентации» или нажмите «Открыть чат», чтобы открыть окно.</div></div></div><p class="annotation">Вспомогательное окно не заменяет чат Телемоста. Его закрытие не завершает занятие.</p><form class="compose" id="compose"><input id="sample-text" aria-label="Тестовое сообщение" placeholder="Тестовое сообщение для макета…" maxlength="2000"><button type="submit">Добавить</button></form><p class="annotation" id="demo-status" role="status">Демонстрационные сообщения · без подключения к встрече</p></div></div>
+<div class="bottom"><span>Локальный интерактивный макет · тот же интерфейс, что в расширении</span><span>Сводки в макете демонстрационные · итоговый отчёт пока не подключён</span></div>
+</main><script>"use strict";
+(() => {
+  // src/styles.ts
+  var tokens = `--ink:#20342d;--muted:#65746c;--green:#246a51;--soft:#eaf3ed;--line:#e1e7e1;--paper:#fff;--bg:#f6f8f4;--warn:#865b19;font:13px/1.5 'Segoe UI',system-ui,sans-serif;color:var(--ink)`;
+  var styles = `
+#mic-level{height:12px!important;border-radius:20px;background:#e8eee9;overflow:hidden;margin:14px 0 7px}#mic-fill{display:block;width:100%;height:100%;background:linear-gradient(90deg,#77ba96,#246a51);transform:scaleX(0);transform-origin:left;transition:transform 160ms ease-out;border-radius:20px}#diagnostic-body>.device-check-heading{margin:18px 0 14px;padding:12px;border-radius:18px;background:#eaf3ed}#diagnostic-body .diagnostic-card{margin:10px 0;padding:16px}#diagnostic-body .device-check{margin:0;padding:0}#device-mic{font-size:13px;line-height:1.5}#device-mic[data-tone=ok]{color:var(--green)}#device-mic[data-tone=warning]{color:var(--warn)}#diagnostic-screen h1{font-size:24px}#device-results{padding:0}#device-results>details{margin:10px 3px}#speaker-test{margin:0}#speaker-status{margin-top:8px}
+
+#open-diagnostics{display:grid;place-items:center;margin-left:auto;width:40px;height:40px;font-size:18px}#diagnostic-screen{padding-top:18px}#diagnostic-screen h1{margin:18px 0 5px}#diagnostic-screen>p{color:var(--muted)}#back-diagnostics{border:0;background:transparent;padding:5px 0;color:var(--green)}.diagnostic-card{padding:14px 16px;background:var(--paper);border:1px solid var(--line);border-radius:18px;margin:10px 0}.diagnostic-card h2{font-size:12px;margin:0 0 9px;color:var(--muted)}#mic-level{display:block;width:100%;height:22px;accent-color:var(--green)}#mic-level-label{display:block;margin-top:6px;color:var(--muted);font-size:11px}#device-results .diagnostic-card p{font-size:13px;margin:0}#diagnostic-body .device-check{border:0}#speaker-status:empty{display:none}
+
+.speaker-test{border:1px solid var(--line);border-radius:16px;background:var(--soft);color:var(--ink);padding:5px 10px;margin-top:8px}#speaker-status{display:block;font-size:10px;color:var(--muted);margin-top:4px}.device-check{margin-top:14px;padding:10px 0;border-top:1px solid var(--line)}.device-check-heading{display:flex;align-items:center;gap:10px}.device-check-heading strong{font-size:12px}.device-check-heading p{font-size:11px;color:var(--muted)}.device-check-button{width:38px;height:38px;flex-shrink:0;border-radius:50%;border:1px solid var(--line);background:var(--soft);color:var(--green);font-size:24px;line-height:1}.device-check-button:hover{background:#d9ebdf}.device-check-button.checking{animation:device-spin 1.5s linear infinite}#device-results{padding-top:9px;font-size:12px}#device-results p{margin:5px 0}#device-results [data-tone=ok]{color:var(--green)}#device-results [data-tone=warning]{color:var(--warn)}#device-results small{display:block;color:var(--muted);font-size:10px;line-height:1.45;margin-top:7px}@keyframes device-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.device-check-button.checking{animation:none}}
+:host,body{${tokens}}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--bg)}button,input{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:default}button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #8db79e;outline-offset:3px}
+#panel{width:384px;max-width:100%;max-height:600px;overflow-y:auto;border-radius:28px;background:var(--bg);padding:20px}header,.brand,.section-head,.message-meta{display:flex;align-items:center;justify-content:space-between;gap:10px}.brand{justify-content:flex-start;gap:10px}.brand-mark{width:34px;height:34px;display:grid;place-items:center;background:var(--green);color:white;border-radius:11px;font-size:21px;font-weight:600}.brand strong{font-size:16px;letter-spacing:-.3px}.eyebrow{display:block;font-size:9px;letter-spacing:1.6px;color:var(--muted);font-weight:600}.version{color:var(--muted);font-size:11px}
+.session{background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:16px;margin-top:18px}.session-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.platform{font-size:11px;color:var(--muted)}.badge{font-size:10px;color:var(--green);background:var(--soft);padding:4px 8px;border-radius:20px;white-space:nowrap}.badge[data-tone=warning]{color:var(--warn);background:#faf0da}.badge[data-tone=neutral]{color:var(--muted);background:var(--bg)}h1{font-size:22px;line-height:1.2;letter-spacing:-.7px;margin:14px 0 7px;font-weight:600}p{margin:0}#hint{color:var(--muted);font-size:12px;min-height:36px}.primary{width:100%;border:0;border-radius:20px;background:var(--green);color:white;padding:11px 12px;margin-top:14px;font-weight:600}.primary:hover{background:#19553f}.primary.finish{background:#fff;color:var(--ink);border:1px solid var(--line)}.primary.finish:hover{background:var(--bg)}
+.options{padding:10px 0 5px}.option{display:flex;align-items:center;gap:12px;padding:10px 0;cursor:pointer}.option-copy{flex:1;min-width:0}.option-copy strong{display:block;font-size:12px;font-weight:600}.option-copy small{display:block;color:var(--muted);font-size:11px;margin-top:2px}.switch{appearance:none;flex:none;width:40px;height:24px;border:1px solid #757575;border-radius:12px;background:#fff;margin:0;position:relative;cursor:pointer}.switch:before{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#757575;box-shadow:0 1px 2px #0002}.switch:checked{background:#2c2c2c;border-color:#2c2c2c}.switch:checked:before{left:18px;background:#fff}.switch:disabled{opacity:.45;cursor:default}
+.section-head{border-top:1px solid var(--line);padding-top:13px;margin-top:3px}.section-head h2{font-size:12px;margin:0;font-weight:600}.counter{font-size:10px;color:var(--muted)}#messages{list-style:none;margin:10px 0 0;padding:0;max-height:166px;overflow-y:auto;overflow-wrap:anywhere;scrollbar-width:thin}#messages li{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:10px 12px;margin:0 0 7px}.message-meta{font-size:10px;color:var(--muted);margin-bottom:5px}.message-meta .origin{color:var(--warn)}.message-text{white-space:pre-wrap;font-size:12px;line-height:1.5}.own{color:var(--green)}#empty{padding:18px 8px;text-align:center;color:var(--muted);font-size:12px}#history-note,#limit{font-size:10px;color:var(--muted);margin:7px 0}footer{margin-top:12px;color:var(--muted);font-size:10px}summary{cursor:pointer;font-size:10px}details p{padding-top:7px;line-height:1.5}#launcher,#hide{border:1px solid var(--line);background:white;color:var(--ink);padding:7px 10px;border-radius:8px}
+@media(max-width:340px){#panel{padding:14px}h1{font-size:20px}.counter{font-size:9px}.session{padding:13px}}
+#analysis-status{font-size:11px;color:var(--muted);margin:8px 0}#questions{list-style:none;padding:0;margin:6px 0}#questions li{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:9px;margin:5px 0;font-size:12px}
+#panel h3{font-size:11px;margin:10px 0 4px}#question-buckets,#technical-issues{list-style:none;padding:0;margin:0}#question-buckets li,#technical-issues li{font-size:11px;padding:5px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+.toggles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{display:grid;place-items:center;gap:6px;aspect-ratio:1;padding:10px 8px;border:1px solid var(--line);border-radius:18px;background:var(--paper);color:var(--ink);text-align:center;transition:background .15s,border-color .15s}
+.tile:hover:not(:disabled){background:var(--soft)}
+.tile[aria-checked=true]{background:var(--soft);border-color:var(--green);color:var(--green)}
+.tile[aria-checked=true] .tile-icon{background:var(--green);color:#fff}
+.tile[aria-disabled=true]{cursor:default}
+.tile-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:var(--bg);color:var(--muted);font-size:16px;line-height:1}
+.tile-label{font-size:11px;font-weight:600;line-height:1.25}
+.tile-note{font-size:10px;color:var(--muted);line-height:1.2}
+#main-screen{display:flex;gap:20px}.col-left{min-width:0}.col-right{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px}.session{margin-top:0}.session-top{flex-wrap:wrap}.analysis-feed{flex:1;max-height:350px;overflow:auto;padding:12px;background:var(--paper);border:1px solid var(--line);border-radius:20px;overflow-wrap:anywhere}.analysis-feed .section-head{border:0;padding:0}.analysis-feed h2{font-size:14px}.analysis-feed .primary{margin-top:10px}.open-chat{margin:0}.diagnostics-link{width:100%;margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:14px;color:var(--green);background:var(--paper)}.tile[aria-checked=true]{background:var(--soft);border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}.tile small{font-size:10px;color:var(--muted)}#hide{position:absolute;right:4px;top:0;z-index:1}#chat-screen #messages{max-height:400px}#back-chat{border:0;background:transparent;color:var(--green);padding:8px 0}#diagnostic-screen{padding:0}#diagnostic-body{display:grid;grid-template-columns:1fr 1fr;gap:10px}#diagnostic-body>.device-check-heading,#diagnostic-body>.device-check{grid-column:1/-1}#diagnostic-body .diagnostic-card{margin:0}#panel{position:relative;width:640px;max-height:580px;border-radius:28px;padding:20px}.connection-preview{padding:24px}
+.toggles{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.tile{min-width:0;font-size:11px;line-height:1.3;overflow-wrap:anywhere}.tile small{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden}.tile>span:not(.tile-icon){font-weight:600}#panel{overflow-y:auto}#panel .col-left{flex:0 0 240px}.analysis-feed{min-height:260px}#open-diagnostics.diagnostics-link{display:block;width:100%;height:auto;margin:0;padding:10px;font-size:12px;border-radius:14px}
+.col-left{display:flex;flex-direction:column;gap:12px}
+@media(max-width:540px){#panel #main-screen{flex-direction:column}#panel .col-left{flex-basis:auto}#diagnostic-body{display:block}}
+`;
+
+  // src/speaker-test.ts
+  function attachSpeakerTest(button, status) {
+    let context;
+    button.onclick = async () => {
+      if (context) return;
+      button.disabled = true;
+      const audio = new AudioContext();
+      context = audio;
+      try {
+        await audio.resume();
+        if (audio.state !== "running") throw new Error("unavailable");
+        status.textContent = "\u0421\u043B\u044B\u0448\u043D\u043E \u043C\u0435\u043B\u043E\u0434\u0438\u044E?";
+        [523.25, 659.25, 783.99].forEach((frequency, i) => {
+          const oscillator = audio.createOscillator(), gain = audio.createGain();
+          const start = audio.currentTime + i * 0.24;
+          oscillator.frequency.value = frequency;
+          oscillator.type = "sine";
+          gain.gain.setValueAtTime(0, start);
+          gain.gain.linearRampToValueAtTime(0.07, start + 0.025);
+          gain.gain.linearRampToValueAtTime(0, start + 0.22);
+          oscillator.connect(gain);
+          gain.connect(audio.destination);
+          oscillator.start(start);
+          oscillator.stop(start + 0.24);
+        });
+        await new Promise((resolve) => setTimeout(resolve, 900));
+        status.textContent = "\u041D\u0435 \u0441\u043B\u044B\u0448\u043D\u043E? \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0433\u0440\u043E\u043C\u043A\u043E\u0441\u0442\u044C \u0438 \u0432\u044B\u0445\u043E\u0434 \u0437\u0432\u0443\u043A\u0430 \u041E\u0421.";
+      } catch {
+        status.textContent = "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0432\u043E\u0441\u043F\u0440\u043E\u0438\u0437\u0432\u0435\u0441\u0442\u0438. \u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443.";
+      } finally {
+        await audio.close().catch(() => {
+        });
+        context = void 0;
+        button.disabled = false;
+      }
+    };
+    window.addEventListener("pagehide", () => {
+      void context?.close().catch(() => {
+      });
+    }, { once: true });
+  }
+
+  // src/notice.ts
+  function createNotice(root2, id = "notice") {
+    const doc = root2.ownerDocument;
+    const style = doc.createElement("style");
+    style.textContent = `
+    .notice{${tokens};box-sizing:border-box;position:fixed;z-index:10000;left:16px;right:16px;bottom:16px;max-width:554px;margin-left:auto;padding:20px;border-radius:24px;background:#fff5e4;box-shadow:0 10px 35px #20342d24;overflow-wrap:anywhere}
+    .notice[hidden]{display:none!important}.notice[data-tone=danger]{background:#f9eeea}.notice[data-tone=info]{background:#f6f8f4;border:1px solid #e1e7e1}
+    .notice__head{display:flex;gap:12px;align-items:center}.notice__icon{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:50%;background:#855916;color:#fff;font-size:17px;font-weight:600}
+    .notice[data-tone=danger] .notice__icon{background:#8a4737}.notice[data-tone=info] .notice__icon{background:#246a51}
+    .notice__title{flex:1;min-width:0;margin:0;font-size:15px;font-weight:600;line-height:1.45}.notice__close{flex:none;display:grid;place-items:center;width:28px;height:28px;padding:0;border:0;border-radius:50%;color:#65746c;background:transparent;font:21px/1 system-ui;cursor:pointer}
+    .notice__close:hover{background:#20342d0d}.notice__close:focus-visible{outline:3px solid #246a51;outline-offset:2px}.notice__message{margin:12px 0 0;color:#536259;font-size:13px;line-height:1.5}
+    @media(max-width:340px){.notice{left:12px;right:12px;padding:16px}.notice__head{gap:9px}.notice__title{font-size:14px}}
+  `;
+    const element = doc.createElement("aside");
+    element.id = id;
+    element.className = "notice";
+    element.hidden = true;
+    element.setAttribute("role", "alert");
+    element.setAttribute("aria-atomic", "true");
+    element.innerHTML = `<div class="notice__head"><span class="notice__icon" aria-hidden="true">!</span><p class="notice__title"></p><button class="notice__close" type="button" aria-label="\u0417\u0430\u043A\u0440\u044B\u0442\u044C \u0443\u0432\u0435\u0434\u043E\u043C\u043B\u0435\u043D\u0438\u0435">\xD7</button></div><p class="notice__message"></p>`;
+    root2.append(style, element);
+    const title = element.querySelector(".notice__title");
+    const message2 = element.querySelector(".notice__message");
+    let currentKey;
+    let dismissed = false;
+    element.querySelector("button").onclick = () => {
+      dismissed = true;
+      element.hidden = true;
+    };
+    return { render(notice) {
+      if (notice?.key !== currentKey) {
+        currentKey = notice?.key;
+        dismissed = false;
+      }
+      element.hidden = !notice || dismissed;
+      if (!notice) return;
+      if (title.textContent !== notice.title) title.textContent = notice.title;
+      if (message2.textContent !== notice.message) message2.textContent = notice.message;
+      element.dataset.tone = notice.tone;
+    } };
+  }
+
+  // src/view.ts
+  function createView(root2, actions, detached = false) {
+    const doc = root2.ownerDocument;
+    root2.innerHTML = `<style>${styles}</style>
+    <button id="launcher" aria-controls="panel">\u0410\u0441\u0441\u0438\u0441\u0442\u0435\u043D\u0442</button>
+    <section id="panel" aria-label="\u0410\u0441\u0441\u0438\u0441\u0442\u0435\u043D\u0442 \u043F\u0440\u0435\u043F\u043E\u0434\u0430\u0432\u0430\u0442\u0435\u043B\u044F">
+      <button id="hide" aria-label="\u0421\u043A\u0440\u044B\u0442\u044C \u043F\u0430\u043D\u0435\u043B\u044C">\xD7</button>
+      <div id="main-screen" class="panel-body"><div class="col-left"><div class="session"><div class="session-top"><span class="platform">\u042F\u043D\u0434\u0435\u043A\u0441 \u0422\u0435\u043B\u0435\u043C\u043E\u0441\u0442</span><span id="chat" class="badge" role="status"></span></div>
+        <h1 id="lesson"></h1><p id="hint"></p>
+        <div id="device-check" class="device-check"><div class="device-check-heading"><button id="run-device-check" type="button" class="device-check-button" aria-label="\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0437\u0432\u0443\u043A \u0438 \u0432\u0438\u0434\u0435\u043E">\u21BB</button><div><strong>\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0437\u0432\u0443\u043A</strong><p id="device-status">\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u0435\u0440\u0435\u0434 \u043F\u0430\u0440\u043E\u0439</p></div></div><button id="speaker-test" type="button" class="speaker-test">\u266B \u0414\u0438\u043D\u0430\u043C\u0438\u043A\u0438</button><small id="speaker-status" role="status"></small><div id="device-results" hidden role="status"><p id="device-mic"></p><p id="device-camera"></p><details><summary>\u041F\u043E\u0434\u0440\u043E\u0431\u043D\u043E\u0441\u0442\u0438</summary><small id="device-detail"></small></details></div></div><button id="start" class="primary">\u041D\u0430\u0447\u0430\u0442\u044C \u0437\u0430\u043D\u044F\u0442\u0438\u0435 \u2197</button>
+        <button id="stop" class="primary finish">\u0417\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u044C \u043F\u0430\u0440\u0443</button>
+      </div>
+      <div class="toggles" role="group" aria-label="\u041F\u0430\u0440\u0430\u043C\u0435\u0442\u0440\u044B \u043F\u0430\u0440\u044B">
+        <button id="pip" class="tile" role="switch" aria-checked="false" aria-describedby="pip-note"><span class="tile-icon" aria-hidden="true">\u25A3</span><span class="tile-label">\u041F\u043E\u0432\u0435\u0440\u0445 \u043F\u0440\u0435\u0437\u0435\u043D\u0442\u0430\u0446\u0438\u0438</span><small id="pip-note"></small></button>
+        <button id="history" class="tile" role="switch" aria-checked="false"><span class="tile-icon" aria-hidden="true">\u21BA</span><span class="tile-label">\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u0430\u044F \u0438\u0441\u0442\u043E\u0440\u0438\u044F</span></button>
+      </div>
+      <button id="open-diagnostics" class="diagnostics-link" type="button">\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0441\u0432\u044F\u0437\u0438 \u2197</button>
+      </div><div class="col-right"><div class="analysis-feed" aria-label="\u0420\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442\u044B \u0430\u043D\u0430\u043B\u0438\u0437\u0430">
+      <div class="section-head"><h2>\u0410\u043D\u0430\u043B\u0438\u0437 \u0432\u043E\u043F\u0440\u043E\u0441\u043E\u0432</h2></div>
+      <button id="analyze" class="primary" type="button">\u0410\u043D\u0430\u043B\u0438\u0437\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0441\u0435\u0439\u0447\u0430\u0441</button>
+      <p id="analysis-status" role="status"></p><ul id="questions" aria-label="\u0412\u043E\u043F\u0440\u043E\u0441\u044B \u0437\u0430\u043D\u044F\u0442\u0438\u044F"></ul>
+      <h3>\u0412\u043E\u043F\u0440\u043E\u0441\u044B \u043F\u043E \u0432\u0440\u0435\u043C\u0435\u043D\u0438 \u0422\u0435\u043B\u0435\u043C\u043E\u0441\u0442\u0430</h3><ul id="question-buckets" aria-label="\u0412\u043E\u043F\u0440\u043E\u0441\u044B \u043F\u043E \u043F\u044F\u0442\u0438\u043C\u0438\u043D\u0443\u0442\u043D\u044B\u043C \u0438\u043D\u0442\u0435\u0440\u0432\u0430\u043B\u0430\u043C"></ul>
+      <h3>\u0422\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u0438\u0435 \u043F\u0440\u043E\u0431\u043B\u0435\u043C\u044B</h3><ul id="technical-issues" aria-label="\u0422\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u0438\u0435 \u043F\u0440\u043E\u0431\u043B\u0435\u043C\u044B"></ul>
+      </div><button id="open-chat" class="primary open-chat" type="button">\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u0447\u0430\u0442</button></div>
+      </div><section id="diagnostic-screen" hidden aria-label="\u0414\u0438\u0430\u0433\u043D\u043E\u0441\u0442\u0438\u043A\u0430"><button id="back-diagnostics" type="button">\u2190 \u041D\u0430\u0437\u0430\u0434</button><h1>\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0441\u0432\u044F\u0437\u0438</h1><p>\u041F\u0440\u043E\u0438\u0437\u043D\u0435\u0441\u0438\u0442\u0435 \u043A\u043E\u0440\u043E\u0442\u043A\u0443\u044E \u0444\u0440\u0430\u0437\u0443</p><div id="diagnostic-body"></div><label for="mic-level">\u0423\u0440\u043E\u0432\u0435\u043D\u044C \u043C\u0438\u043A\u0440\u043E\u0444\u043E\u043D\u0430</label><div id="mic-level" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="mic-fill"></span></div><small id="mic-level-label">\u041D\u0435\u0442 \u0437\u0430\u043C\u0435\u0440\u0430</small></section>
+      <section id="chat-screen" hidden aria-label="\u0421\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F \u0447\u0430\u0442\u0430"><button id="back-chat" type="button">\u2190 \u041A \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430\u043C</button>
+      <div class="section-head"><h2>\u0421\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F \u0447\u0430\u0442\u0430</h2><span id="count" class="counter"></span></div>
+      <p id="empty"></p><ul id="messages" aria-label="\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u044B\u0435 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F"></ul>
+      <p id="history-note" hidden>\u0418\u0441\u0442\u043E\u0440\u0438\u044F \u043C\u043E\u0436\u0435\u0442 \u043E\u0442\u043D\u043E\u0441\u0438\u0442\u044C\u0441\u044F \u043A \u043F\u0440\u043E\u0448\u043B\u044B\u043C \u0432\u0441\u0442\u0440\u0435\u0447\u0430\u043C.</p><p id="limit" hidden>\u041F\u043E\u043A\u0430\u0437\u0430\u043D\u044B \u043F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0435 100 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0439.</p></section>
+    </section>`;
+    const get = (id) => root2.querySelector("#" + id);
+    get("diagnostic-body").append(get("device-check"));
+    const micCard = doc.createElement("div");
+    micCard.className = "diagnostic-card";
+    const micTitle = doc.createElement("h2");
+    micTitle.textContent = "\u041C\u0438\u043A\u0440\u043E\u0444\u043E\u043D";
+    micCard.append(micTitle);
+    micCard.append(get("mic-level"), get("mic-level-label"));
+    get("diagnostic-body").insertBefore(micCard, get("device-check"));
+    get("diagnostic-body").prepend(get("device-check").querySelector(".device-check-heading"));
+    const label = root2.querySelector('label[for="mic-level"]');
+    label?.remove();
+    get("mic-level").setAttribute("aria-label", "\u0423\u0440\u043E\u0432\u0435\u043D\u044C \u043C\u0438\u043A\u0440\u043E\u0444\u043E\u043D\u0430");
+    micCard.insertBefore(get("device-mic"), get("mic-level"));
+    for (const [id, title] of [["device-camera", "\u041A\u0430\u043C\u0435\u0440\u0430"]]) {
+      const card = doc.createElement("div");
+      card.className = "diagnostic-card";
+      const heading = doc.createElement("h2");
+      heading.textContent = title;
+      card.append(heading, get(id));
+      get("device-results").prepend(card);
+    }
+    const speakerCard = doc.createElement("div");
+    speakerCard.className = "diagnostic-card";
+    speakerCard.append(get("speaker-test"), get("speaker-status"));
+    get("diagnostic-body").append(speakerCard);
+    get("open-diagnostics").onclick = () => {
+      get("main-screen").hidden = true;
+      get("diagnostic-screen").hidden = false;
+      get("back-diagnostics").focus();
+    };
+    get("back-diagnostics").onclick = () => {
+      get("main-screen").hidden = false;
+      get("diagnostic-screen").hidden = true;
+      get("open-diagnostics").focus();
+    };
+    const notice = createNotice(root2, "error");
+    const setText = (id, value) => {
+      if (get(id).textContent !== value) get(id).textContent = value;
+    };
+    get("launcher").onclick = actions.toggle;
+    get("hide").onclick = actions.toggle;
+    get("start").onclick = actions.start;
+    get("stop").onclick = actions.stop;
+    get("analyze").onclick = actions.analyze;
+    attachSpeakerTest(get("speaker-test"), get("speaker-status"));
+    get("run-device-check").onclick = () => actions.checkDevices?.();
+    get("history").onclick = () => actions.history(get("history").getAttribute("aria-checked") !== "true");
+    get("pip").onclick = () => actions.pip(get("pip").getAttribute("aria-checked") !== "true");
+    get("open-chat").onclick = () => {
+      if (get("open-chat").dataset.supported === "true") actions.openChat();
+      else {
+        get("main-screen").hidden = true;
+        get("chat-screen").hidden = false;
+        get("back-chat").focus();
+      }
+    };
+    get("back-chat").onclick = () => {
+      get("chat-screen").hidden = true;
+      get("main-screen").hidden = false;
+      get("open-chat").focus();
+    };
+    let messageKey = "";
+    return { render(state2) {
+      get("device-check").hidden = false;
+      const check = state2.deviceCheck;
+      const checking = check?.phase === "running";
+      const volume = checking && check?.level !== void 0 ? Math.min(100, Math.sqrt(check.level) * 100) : 0;
+      get("mic-fill").style.transform = `scaleX(${volume / 100})`;
+      get("mic-level").setAttribute("aria-valuenow", String(Math.round(volume)));
+      get("device-mic").hidden = false;
+      setText("mic-level-label", checking ? check?.level === void 0 ? "\u0423\u0440\u043E\u0432\u0435\u043D\u044C \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D" : "\u0422\u0435\u043A\u0443\u0449\u0438\u0439 \u0441\u0438\u0433\u043D\u0430\u043B" : check?.phase === "done" ? "\u0417\u0430\u043C\u0435\u0440 \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043D" : "\u041D\u0430\u0436\u043C\u0438\u0442\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443");
+      const checkButton = get("run-device-check");
+      checkButton.disabled = checking;
+      checkButton.classList.toggle("checking", checking);
+      checkButton.setAttribute("aria-label", check?.phase === "done" ? "\u041F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u044C \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443 \u0437\u0432\u0443\u043A\u0430 \u0438 \u0432\u0438\u0434\u0435\u043E" : "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u0437\u0432\u0443\u043A \u0438 \u0432\u0438\u0434\u0435\u043E");
+      get("device-check").setAttribute("aria-busy", String(checking));
+      setText("device-status", checking ? "\u0413\u043E\u0432\u043E\u0440\u0438\u0442\u0435 5 \u0441\u0435\u043A\u0443\u043D\u0434\u2026" : check?.stale ? "\u041F\u0440\u043E\u0448\u043B\u044B\u0439 \u0437\u0430\u043C\u0435\u0440 \xB7 " + new Date(check.checkedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + " \xB7 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443" : check?.phase === "done" ? "\u041F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E \u0432 " + new Date(check.checkedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "\u041F\u0440\u043E\u0432\u0435\u0440\u0438\u0442\u044C \u043F\u0435\u0440\u0435\u0434 \u043F\u0430\u0440\u043E\u0439");
+      get("device-results").hidden = false;
+      for (const [id, result] of [["device-mic", check?.microphone], ["device-camera", check?.camera]]) {
+        setText(id, result ? (result.tone === "ok" ? "\u2713 " : result.tone === "warning" ? "! " : "\xB7 ") + result.text : checking ? "\u041F\u0440\u043E\u0432\u0435\u0440\u044F\u0435\u043C\u2026" : "\u0415\u0449\u0451 \u043D\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u0435\u043D\u043E");
+        get(id).dataset.tone = check?.stale ? "unknown" : result?.tone ?? "unknown";
+      }
+      setText("device-detail", check?.details || "\u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0443\u0441\u0442\u0440\u043E\u0439\u0441\u0442\u0432\u0430 \u0432 \u0422\u0435\u043B\u0435\u043C\u043E\u0441\u0442\u0435 \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u043A\u0443. \u041F\u0440\u0438\u0451\u043C \u0443 \u0441\u0442\u0443\u0434\u0435\u043D\u0442\u043E\u0432 \u043D\u0435 \u043F\u0440\u043E\u0432\u0435\u0440\u044F\u0435\u0442\u0441\u044F.");
+      get("launcher").hidden = detached || state2.shown;
+      get("panel").hidden = !state2.shown;
+      get("hide").hidden = detached;
+      get("launcher").setAttribute("aria-expanded", String(state2.shown));
+      setText("lesson", state2.active ? "\u041F\u0430\u0440\u0430 \u0438\u0434\u0451\u0442" : state2.ended ? "\u041F\u0430\u0440\u0430 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043D\u0430" : "\u0412\u0441\u0451 \u0432\u0430\u0436\u043D\u043E\u0435 \u2014 \u0440\u044F\u0434\u043E\u043C");
+      setText("chat", !state2.active ? "\u041D\u0430\u0431\u043B\u044E\u0434\u0435\u043D\u0438\u0435 \u0432\u044B\u043A\u043B\u044E\u0447\u0435\u043D\u043E" : state2.chat === "available" ? "\u0427\u0430\u0442 \u043E\u0442\u043A\u0440\u044B\u0442" : state2.chat === "opening" ? "\u041E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u043C \u0447\u0430\u0442\u2026" : "\u0427\u0430\u0442 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D");
+      get("chat").dataset.tone = !state2.active ? "neutral" : state2.chat === "available" ? "success" : "warning";
+      setText("hint", state2.active ? state2.chat === "available" ? "\u0421\u043B\u0435\u0434\u0438\u0442\u0435 \u0437\u0430 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F\u043C\u0438, \u043F\u043E\u043A\u0430 \u0432\u0435\u0434\u0451\u0442\u0435 \u043F\u0430\u0440\u0443. \u041E\u0441\u0442\u0430\u0432\u044C\u0442\u0435 \u0447\u0430\u0442 \u0422\u0435\u043B\u0435\u043C\u043E\u0441\u0442\u0430 \u043E\u0442\u043A\u0440\u044B\u0442\u044B\u043C." : "\u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u0447\u0430\u0442 \u0422\u0435\u043B\u0435\u043C\u043E\u0441\u0442\u0430 \u0432\u0440\u0443\u0447\u043D\u0443\u044E, \u0447\u0442\u043E\u0431\u044B \u043F\u043E\u043B\u0443\u0447\u0430\u0442\u044C \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F." : state2.ended ? "\u0421\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F \u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B \u0434\u043E \u043E\u0431\u043D\u043E\u0432\u043B\u0435\u043D\u0438\u044F \u0432\u043A\u043B\u0430\u0434\u043A\u0438. \u041D\u043E\u0432\u043E\u0435 \u0437\u0430\u043D\u044F\u0442\u0438\u0435 \u043E\u0447\u0438\u0441\u0442\u0438\u0442 \u044D\u0442\u043E\u0442 \u0441\u043F\u0438\u0441\u043E\u043A." : "\u041D\u0430\u0447\u043D\u0438\u0442\u0435 \u0437\u0430\u043D\u044F\u0442\u0438\u0435, \u0447\u0442\u043E\u0431\u044B \u0441\u043E\u0431\u0440\u0430\u0442\u044C \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F \u0447\u0430\u0442\u0430 \u0432 \u043E\u0434\u043D\u043E\u043C \u043C\u0435\u0441\u0442\u0435.");
+      get("start").hidden = state2.active;
+      get("stop").hidden = !state2.active;
+      setText("start", state2.ended ? "\u041D\u0430\u0447\u0430\u0442\u044C \u043D\u043E\u0432\u0443\u044E \u043F\u0430\u0440\u0443 \u2197" : "\u041D\u0430\u0447\u0430\u0442\u044C \u043F\u0430\u0440\u0443 \u2197");
+      get("pip").setAttribute("aria-checked", String(state2.pipPreferred));
+      get("pip").disabled = state2.busy || !state2.supported;
+      setText("pip-note", !state2.supported ? "\u041D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u043E \u0432 \u044D\u0442\u043E\u043C \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0435" : state2.busy ? "\u041E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u043C \u043E\u043A\u043D\u043E\u2026" : state2.active ? state2.pip ? "\u041E\u043A\u043D\u043E \u043E\u0442\u043A\u0440\u044B\u0442\u043E \xB7 \u043C\u043E\u0436\u043D\u043E \u0437\u0430\u043A\u0440\u044B\u0442\u044C \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0430\u0442\u0435\u043B\u0435\u043C" : "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0435 \u043E\u043A\u043D\u043E \u0447\u0430\u0442\u0430" : "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E\u0435 \u043E\u043A\u043D\u043E \u0447\u0430\u0442\u0430 \u043F\u0440\u0438 \u0441\u0442\u0430\u0440\u0442\u0435");
+      notice.render(state2.error ? {
+        key: `pip:${state2.error}`,
+        tone: "warning",
+        title: "\u041D\u0435 \u043F\u043E\u043B\u0443\u0447\u0438\u043B\u043E\u0441\u044C \u043E\u0442\u043A\u0440\u044B\u0442\u044C \u043E\u043A\u043D\u043E \u0447\u0430\u0442\u0430",
+        message: "\u0412\u0435\u0440\u043D\u0438\u0442\u0435\u0441\u044C \u0432 \u0422\u0435\u043B\u0435\u043C\u043E\u0441\u0442 \u0438 \u0432\u043A\u043B\u044E\u0447\u0438\u0442\u0435 \u043E\u043A\u043D\u043E \u043F\u043E\u0432\u0435\u0440\u0445 \u043F\u0440\u0435\u0437\u0435\u043D\u0442\u0430\u0446\u0438\u0438 \u0435\u0449\u0451 \u0440\u0430\u0437."
+      } : state2.active && state2.chat === "unavailable" ? {
+        key: "chat-unavailable",
+        tone: "info",
+        title: "\u0427\u0430\u0442 \u043F\u043E\u043A\u0430 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D",
+        message: "\u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u0447\u0430\u0442 \u0422\u0435\u043B\u0435\u043C\u043E\u0441\u0442\u0430 \u0432\u0440\u0443\u0447\u043D\u0443\u044E, \u0447\u0442\u043E\u0431\u044B \u043F\u0440\u043E\u0434\u043E\u043B\u0436\u0438\u0442\u044C \u043F\u043E\u043B\u0443\u0447\u0430\u0442\u044C \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F."
+      } : void 0);
+      get("history").setAttribute("aria-checked", String(state2.history));
+      get("open-chat").dataset.supported = String(state2.supported);
+      get("open-chat").disabled = state2.busy;
+      setText("open-chat", state2.busy ? "\u041E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u043C\u2026" : state2.pip ? "\u041F\u0435\u0440\u0435\u0439\u0442\u0438 \u043A \u0447\u0430\u0442\u0443 \u2197" : state2.supported ? "\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u0447\u0430\u0442 \u2197" : "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0447\u0430\u0442 \u0437\u0434\u0435\u0441\u044C");
+      setText("count", `\u041D\u043E\u0432\u044B\u0445 \u0437\u0430 \u0437\u0430\u043D\u044F\u0442\u0438\u0435: ${state2.messages.filter((m) => m.origin === "observed").length}`);
+      get("analyze").disabled = !state2.active || !state2.analysisPending || Boolean(state2.analysisBusy);
+      setText("analyze", state2.analysisBusy ? "\u0410\u043D\u0430\u043B\u0438\u0437\u0438\u0440\u0443\u0435\u043C\u2026" : `\u0410\u043D\u0430\u043B\u0438\u0437\u0438\u0440\u043E\u0432\u0430\u0442\u044C \u0441\u0435\u0439\u0447\u0430\u0441 (${state2.analysisPending ?? 0})`);
+      setText("analysis-status", state2.analysisError || (state2.analysisBusy ? "\u0418\u0434\u0451\u0442 \u0430\u043D\u0430\u043B\u0438\u0437 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0439" : state2.analysisDueAt ? "\u0410\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438\u0439 \u0430\u043D\u0430\u043B\u0438\u0437 \u0447\u0435\u0440\u0435\u0437 5 \u043C\u0438\u043D\u0443\u0442 \u043F\u043E\u0441\u043B\u0435 \u043F\u0435\u0440\u0432\u043E\u0433\u043E \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F" : state2.compiledQuestions?.length ? `\u041E\u0431\u043E\u0431\u0449\u0451\u043D\u043D\u044B\u0445 \u0432\u043E\u043F\u0440\u043E\u0441\u043E\u0432: ${state2.compiledQuestions.length}` : state2.compiledTechnicalIssues?.length ? `\u0422\u0435\u0445\u043D\u0438\u0447\u0435\u0441\u043A\u0438\u0445 \u043F\u0440\u043E\u0431\u043B\u0435\u043C: ${state2.compiledTechnicalIssues.length}` : "\u0420\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442\u043E\u0432 \u0430\u043D\u0430\u043B\u0438\u0437\u0430 \u043F\u043E\u043A\u0430 \u043D\u0435\u0442"));
+      const questions = get("questions");
+      const questionKey = JSON.stringify(state2.compiledQuestions ?? []);
+      if (questions.dataset.key !== questionKey) {
+        questions.dataset.key = questionKey;
+        questions.replaceChildren(...(state2.compiledQuestions ?? []).map((question) => {
+          const item = doc.createElement("li");
+          item.textContent = `${question.text} \xB7 ${question.eventIds.length}`;
+          return item;
+        }));
+      }
+      const buckets = get("question-buckets");
+      const bucketKey = JSON.stringify(state2.analysisSummary?.questionBuckets ?? []);
+      if (buckets.dataset.key !== bucketKey) {
+        buckets.dataset.key = bucketKey;
+        buckets.replaceChildren(...(state2.analysisSummary?.questionBuckets ?? []).map((bucket) => {
+          const item = doc.createElement("li");
+          item.textContent = `${bucket.from}\u2013${bucket.to}: ${bucket.questionCount}`;
+          return item;
+        }));
+      }
+      const issues = get("technical-issues");
+      const issueKey = JSON.stringify(state2.compiledTechnicalIssues ?? []);
+      if (issues.dataset.key !== issueKey) {
+        issues.dataset.key = issueKey;
+        issues.replaceChildren(...(state2.compiledTechnicalIssues ?? []).map((issue) => {
+          const item = doc.createElement("li");
+          item.textContent = `${issue.text} \xB7 ${issue.eventIds.length}`;
+          return item;
+        }));
+      }
+      const visible = state2.messages.filter((m) => state2.history || m.origin === "observed");
+      setText("empty", visible.length ? "" : state2.active ? "\u041D\u043E\u0432\u044B\u0445 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0439 \u043F\u043E\u043A\u0430 \u043D\u0435\u0442" : state2.ended ? "\u0412\u043E \u0432\u0440\u0435\u043C\u044F \u0437\u0430\u043D\u044F\u0442\u0438\u044F \u043D\u043E\u0432\u044B\u0445 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0439 \u043D\u0435 \u043E\u0431\u043D\u0430\u0440\u0443\u0436\u0435\u043D\u043E" : "\u0417\u0434\u0435\u0441\u044C \u043F\u043E\u044F\u0432\u044F\u0442\u0441\u044F \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F \u0437\u0430\u043D\u044F\u0442\u0438\u044F");
+      get("empty").hidden = visible.length > 0;
+      get("history-note").hidden = !state2.history || !visible.some((m) => m.origin !== "observed");
+      get("limit").hidden = visible.length <= 100;
+      const tail = visible.slice(-100), key = JSON.stringify(tail);
+      if (key === messageKey) return;
+      messageKey = key;
+      const list = get("messages");
+      const atBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 32, scrollTop = list.scrollTop;
+      list.replaceChildren(...tail.map((message2) => {
+        const li = doc.createElement("li"), meta = doc.createElement("div");
+        meta.className = "message-meta";
+        const origin = doc.createElement("span");
+        origin.textContent = message2.origin !== "observed" ? "\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u0430\u044F \u0438\u0441\u0442\u043E\u0440\u0438\u044F" : message2.own ? "\u0412\u0430\u0448\u0435 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435" : "\u041D\u043E\u0432\u043E\u0435 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435";
+        origin.className = message2.origin !== "observed" ? "origin" : message2.own ? "own" : "";
+        const time = doc.createElement("span");
+        time.textContent = message2.platformTime ?? "\u0412\u0440\u0435\u043C\u044F \u043D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D\u043E";
+        meta.append(origin, time);
+        const text = doc.createElement("p");
+        text.className = "message-text";
+        text.textContent = message2.text;
+        li.append(meta, text);
+        return li;
+      }));
+      list.scrollTop = atBottom ? list.scrollHeight : scrollTop;
+    } };
+  }
+
+  // src/pip-styles.ts
+  var pipStyles = `
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{${tokens};background:var(--bg);display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:15px 16px;background:var(--paper);border-bottom:1px solid var(--line)}header strong{font-size:14px;letter-spacing:-.2px}#status{font-size:10px;color:var(--green);background:var(--soft);padding:4px 8px;border-radius:20px}#feed{flex:1;min-height:0;overflow:auto;padding:14px;overflow-anchor:none}ol{list-style:none;padding:0;margin:0}li{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:12px 14px;margin-bottom:9px;overflow-wrap:anywhere}p{margin:0;white-space:pre-wrap;font-size:14px;line-height:1.6}.time{display:block;text-align:right;font-size:10px;color:var(--muted);margin-top:5px}small{display:block;color:var(--warn);font-size:10px;margin-bottom:5px}#empty{color:var(--muted);padding:30px 12px;text-align:center;font-size:13px}footer{font-size:10px;color:var(--muted);padding:9px 14px;border-top:1px solid var(--line)}[hidden]{display:none!important}
+`;
+
+  // src/pip-view.ts
+  function createChatView(doc) {
+    doc.body.innerHTML = `<style>${pipStyles}</style><header><strong>\u0427\u0430\u0442 \u0437\u0430\u043D\u044F\u0442\u0438\u044F</strong><span id="status" role="status"></span></header><main id="feed"><p id="empty">\u041D\u043E\u0432\u044B\u0445 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0439 \u043F\u043E\u043A\u0430 \u043D\u0435\u0442</p><ol id="chat-messages" aria-label="\u0421\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u044F \u0447\u0430\u0442\u0430"></ol></main><footer>\u0418\u0441\u0442\u043E\u0440\u0438\u044F \u043C\u043E\u0436\u0435\u0442 \u0431\u044B\u0442\u044C \u043D\u0435\u043F\u043E\u043B\u043D\u043E\u0439 \xB7 \u0434\u0430\u043D\u043D\u044B\u0435 \u0432 \u044D\u0442\u043E\u0439 \u0432\u043A\u043B\u0430\u0434\u043A\u0435</footer>`;
+    const feed = doc.querySelector("#feed");
+    const list = doc.querySelector("#chat-messages");
+    let ids = [];
+    let messageKey = "";
+    return { render(s) {
+      const status = doc.querySelector("#status");
+      const statusText = !s.active ? "\u0417\u0430\u043D\u044F\u0442\u0438\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043D\u043E" : s.chat === "available" ? "\u0427\u0430\u0442 \u043E\u0442\u043A\u0440\u044B\u0442" : s.chat === "opening" ? "\u041E\u0442\u043A\u0440\u044B\u0432\u0430\u0435\u043C \u0447\u0430\u0442" : "\u0427\u0430\u0442 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D";
+      if (status.textContent !== statusText) status.textContent = statusText;
+      const messages = s.messages.filter((m) => s.history || m.origin === "observed");
+      doc.querySelector("#empty").hidden = messages.length > 0;
+      const key = JSON.stringify(messages);
+      if (key === messageKey) return;
+      const previousKey = messageKey;
+      messageKey = key;
+      const atBottom = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 32;
+      const append = ids.length <= messages.length && ids.every((id, i) => id === messages[i].eventId) && previousKey === JSON.stringify(messages.slice(0, ids.length));
+      if (!append) list.replaceChildren();
+      for (const m of messages.slice(append ? ids.length : 0)) {
+        const li = doc.createElement("li"), text = doc.createElement("p");
+        text.textContent = m.text;
+        li.append(text);
+        if (m.origin !== "observed") {
+          const label = doc.createElement("small");
+          label.textContent = "\u0414\u043E\u0441\u0442\u0443\u043F\u043D\u0430\u044F \u0438\u0441\u0442\u043E\u0440\u0438\u044F";
+          li.prepend(label);
+        }
+        if (m.platformTime) {
+          const time = doc.createElement("span");
+          time.className = "time";
+          time.textContent = m.platformTime;
+          li.append(time);
+        }
+        list.append(li);
+      }
+      ids = messages.map((m) => m.eventId);
+      if (atBottom) feed.scrollTop = feed.scrollHeight;
+    } };
+  }
+
+  // preview/demo.ts
+  var message = (text, origin = "observed", own = false) => ({ eventId: crypto.randomUUID(), text, platformTime: "10:42", observedAt: (/* @__PURE__ */ new Date()).toISOString(), own, authorEvidence: "unknown", origin });
+  var samples = () => [message("\u041C\u0430\u0442\u0435\u0440\u0438\u0430\u043B\u044B \u043A \u043F\u0440\u043E\u0448\u043B\u043E\u0439 \u043F\u0430\u0440\u0435 \u0432\u044B\u043B\u043E\u0436\u0435\u043D\u044B \u0432 \u043A\u0443\u0440\u0441\u0435.", "initial"), message("\u041C\u043E\u0436\u043D\u043E \u0435\u0449\u0451 \u0440\u0430\u0437 \u043E\u0431\u044A\u044F\u0441\u043D\u0438\u0442\u044C \u0440\u0430\u0437\u043D\u0438\u0446\u0443 \u043C\u0435\u0436\u0434\u0443 JOIN \u0438 UNION?"), message("\u041F\u0440\u0438\u043C\u0435\u0440 \u0437\u0430\u043F\u0440\u043E\u0441\u0430 \u0434\u043E\u0431\u0430\u0432\u043B\u044E \u043F\u043E\u0441\u043B\u0435 \u0437\u0430\u043D\u044F\u0442\u0438\u044F.", "observed", true), message("\u041F\u043B\u043E\u0445\u043E \u0441\u043B\u044B\u0448\u043D\u043E \u043F\u043E\u0441\u043B\u0435\u0434\u043D\u0438\u0435 \u043D\u0435\u0441\u043A\u043E\u043B\u044C\u043A\u043E \u043C\u0438\u043D\u0443\u0442.")];
+  var state = { active: true, ended: false, shown: true, history: false, busy: false, chat: "available", error: "", pip: true, pipPreferred: true, supported: true, messages: samples(), analysisPending: 3 };
+  var root = document.querySelector("#popup").attachShadow({ mode: "open" });
+  var frame = document.querySelector("#pip-preview");
+  var pipDoc = frame.contentDocument;
+  pipDoc.documentElement.lang = "ru";
+  var pipView = createChatView(pipDoc);
+  var view = createView(root, {
+    toggle() {
+    },
+    openChat() {
+      state.pip = true;
+      state.pipPreferred = true;
+      render();
+    },
+    checkDevices() {
+      state.deviceCheck = { phase: "done", checkedAt: Date.now(), microphone: { tone: "ok", text: "\u0414\u0435\u043C\u043E\u043D\u0441\u0442\u0440\u0430\u0446\u0438\u044F: \u043C\u0438\u043A\u0440\u043E\u0444\u043E\u043D \u0440\u0430\u0431\u043E\u0442\u0430\u0435\u0442" }, camera: { tone: "warning", text: "\u0414\u0435\u043C\u043E\u043D\u0441\u0442\u0440\u0430\u0446\u0438\u044F: \u043A\u0430\u043C\u0435\u0440\u0430 \u0432\u044B\u043A\u043B\u044E\u0447\u0435\u043D\u0430" } };
+      render();
+    },
+    start() {
+      state = { ...state, active: true, ended: false, chat: "available", error: "", messages: [], compiledQuestions: [], compiledTechnicalIssues: [], analysisPending: 0, analysisSummary: void 0, analysisError: "", pip: state.pipPreferred };
+      render();
+    },
+    stop() {
+      state.active = false;
+      state.ended = true;
+      render();
+    },
+    history(value) {
+      state.history = value;
+      render();
+    },
+    pip(value) {
+      state.pipPreferred = value;
+      state.pip = state.active && value;
+      if (value) state.error = "";
+      render();
+    },
+    analyze() {
+      state.analysisPending = 0;
+      state.analysisError = "";
+      state.analysisSummary = { questionCount: 2, technicalIssueCount: 1, uncertainCount: 0, questionBuckets: [{ from: "10:40", to: "10:45", questionCount: 2 }] };
+      state.compiledQuestions = [{ questionId: "demo-question", text: "\u0427\u0435\u043C JOIN \u043E\u0442\u043B\u0438\u0447\u0430\u0435\u0442\u0441\u044F \u043E\u0442 UNION?", eventIds: ["demo-1", "demo-2"] }];
+      state.compiledTechnicalIssues = [{ issueId: "demo-issue", text: "\u0421\u0442\u0443\u0434\u0435\u043D\u0442\u044B \u0436\u0430\u043B\u0443\u044E\u0442\u0441\u044F \u043D\u0430 \u0442\u0438\u0445\u0438\u0439 \u0437\u0432\u0443\u043A", eventIds: ["demo-3"] }];
+      render();
+    }
+  }, true);
+  var connectionNotice = createNotice(root, "connection-notice");
+  var connectionScreen = document.createElement("div");
+  connectionScreen.className = "connection-preview";
+  connectionScreen.hidden = true;
+  connectionScreen.innerHTML = '<div class="brand"><span class="brand-mark" aria-hidden="true">\u0430</span><strong>\u0410\u0441\u0441\u0438\u0441\u0442\u0435\u043D\u0442</strong></div><h1>\u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u0432\u0441\u0442\u0440\u0435\u0447\u0443</h1><p>\u041F\u043E\u0434\u043A\u043B\u044E\u0447\u0438\u0442\u0435\u0441\u044C \u043A \u042F\u043D\u0434\u0435\u043A\u0441 \u0422\u0435\u043B\u0435\u043C\u043E\u0441\u0442\u0443 \u0438 \u043E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043D\u0438\u0435.</p>';
+  var connectionStyle = document.createElement("style");
+  connectionStyle.textContent = ".connection-preview{box-sizing:border-box;min-height:360px;padding:24px;background:var(--bg);color:var(--ink);font:13px/1.5 system-ui}.connection-preview h1{font-size:22px}.connection-preview p{color:var(--muted)}";
+  root.append(connectionStyle, connectionScreen);
+  var disconnected = false;
+  function render() {
+    view.render(state);
+    pipView.render(state);
+    root.querySelector("#panel").hidden = disconnected;
+    connectionScreen.hidden = !disconnected;
+    connectionNotice.render(disconnected ? { key: "connection", tone: "danger", title: "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0438\u0442\u044C\u0441\u044F \u043A \u0432\u0441\u0442\u0440\u0435\u0447\u0435", message: "\u041E\u0442\u043A\u0440\u043E\u0439\u0442\u0435 \u0432\u043A\u043B\u0430\u0434\u043A\u0443 \u0422\u0435\u043B\u0435\u043C\u043E\u0441\u0442\u0430. \u0415\u0441\u043B\u0438 \u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043D\u0438\u0435 \u043E\u0431\u043D\u043E\u0432\u043B\u0435\u043D\u043E, \u043E\u0431\u043D\u043E\u0432\u0438\u0442\u0435 \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u0443 \u0432\u0441\u0442\u0440\u0435\u0447\u0438." } : void 0);
+    frame.hidden = disconnected || !state.pip;
+    document.querySelector("#pip-off").hidden = !disconnected && state.pip;
+    document.querySelector("#pip-off").textContent = disconnected ? "\u041D\u0435\u0442 \u043F\u043E\u0434\u043A\u043B\u044E\u0447\u0435\u043D\u0438\u044F \u043A \u0432\u0441\u0442\u0440\u0435\u0447\u0435" : "\u0412\u043A\u043B\u044E\u0447\u0438\u0442\u0435 \xAB\u041F\u043E\u0432\u0435\u0440\u0445 \u043F\u0440\u0435\u0437\u0435\u043D\u0442\u0430\u0446\u0438\u0438\xBB, \u0447\u0442\u043E\u0431\u044B \u043E\u0442\u043A\u0440\u044B\u0442\u044C \u0447\u0430\u0442.";
+    document.querySelector("#compose button").disabled = disconnected || !state.active;
+    document.querySelector("#sample-text").disabled = disconnected || !state.active;
+    document.querySelectorAll("[data-scene]").forEach((button) => button.setAttribute("aria-pressed", "false"));
+  }
+  document.querySelectorAll("[data-scene]").forEach((button) => button.onclick = () => {
+    const scene = button.dataset.scene;
+    root.querySelector("#main-screen").hidden = false;
+    root.querySelector("#diagnostic-screen").hidden = true;
+    root.querySelector("#chat-screen").hidden = true;
+    disconnected = scene === "disconnected";
+    state = { ...state, compiledQuestions: [], compiledTechnicalIssues: [], analysisSummary: void 0, analysisBusy: scene === "analyzing", analysisError: scene === "analysis-error" ? "\u041B\u043E\u043A\u0430\u043B\u044C\u043D\u044B\u0439 \u0441\u0435\u0440\u0432\u0438\u0441 \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D. \u041F\u0440\u043E\u0432\u0435\u0440\u044C\u0442\u0435 \u0442\u0435\u0440\u043C\u0438\u043D\u0430\u043B \u0438 \u043F\u043E\u0432\u0442\u043E\u0440\u0438\u0442\u0435 \u0430\u043D\u0430\u043B\u0438\u0437." : "", analysisPending: scene === "ready" ? 0 : 3, active: scene !== "ready" && scene !== "ended", ended: scene === "ended", messages: scene === "ready" ? [] : samples(), chat: scene === "unavailable" ? "unavailable" : "available", history: false, error: scene === "error" ? "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043E\u0442\u043A\u0440\u044B\u0442\u044C \u043E\u043A\u043D\u043E. \u0412\u0435\u0440\u043D\u0438\u0442\u0435\u0441\u044C \u0432 \u0422\u0435\u043B\u0435\u043C\u043E\u0441\u0442 \u0438 \u043F\u043E\u043F\u0440\u043E\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437." : "", supported: scene !== "unsupported", pip: scene !== "ready" && scene !== "unsupported" && scene !== "error", pipPreferred: scene !== "ready" && scene !== "unsupported" && scene !== "error" };
+    render();
+    if (scene === "diagnostics") root.querySelector("#open-diagnostics").click();
+    if (scene === "results") root.querySelector("#analyze").click();
+    button.setAttribute("aria-pressed", "true");
+  });
+  document.querySelector("#compose").onsubmit = (event) => {
+    event.preventDefault();
+    const input = document.querySelector("#sample-text");
+    if (disconnected || !state.active || !input.value.trim()) return;
+    state.messages.push(message(input.value.trim()));
+    state.analysisPending = (state.analysisPending ?? 0) + 1;
+    input.value = "";
+    render();
+    document.querySelector("#demo-status").textContent = "\u0422\u0435\u0441\u0442\u043E\u0432\u043E\u0435 \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0435 \u0434\u043E\u0431\u0430\u0432\u043B\u0435\u043D\u043E \u0432 \u043C\u0430\u043A\u0435\u0442";
+  };
+  render();
+  document.querySelector('[data-scene="active"]').setAttribute("aria-pressed", "true");
+})();
+</script></body></html>

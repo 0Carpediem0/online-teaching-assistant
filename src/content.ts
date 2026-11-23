@@ -25,15 +25,16 @@ if (!context.teacherAssistantStarted) {
  window.addEventListener('pagehide', () => clearInterval(deviceTimer), {once:true});
  let pip:Window|undefined,pipView:ReturnType<typeof createChatView>|undefined;
  const api=(window as Window & {documentPictureInPicture?:{requestWindow(o:{width:number;height:number}):Promise<Window>}}).documentPictureInPicture;
+ let openingCancelled = false;
  const actions={
   toggle:()=>{shown=!shown;render();},
   start:()=>{if(active)return;clearAnalysisTimer();messages=[];analysisSession=new AnalysisSession();analysisBusy=false;analysisError='';error='';active=true;ended=false;stop=new TelemostAdapter().observeChat(v=>{chat=v;render();},m=>{messages.push(m);if(analysisSession?.add(m))scheduleAnalysis();render();});render();},
   stop:()=>{clearAnalysisTimer();stop?.();stop=undefined;active=false;ended=true;render();},
   history:(v:boolean)=>{history=v;render();},
-  pip:async(v:boolean)=>{if(!v){pipPreferred=false;error='';pip?.close();render();return;}if(busy||pip||!api)return;busy=true;error='';render();try{
-   const opened=await api.requestWindow({width:320,height:420});if(!pipPreferred){opened.close();return;}pip=opened;pip.document.title='Чат занятия';pipView=createChatView(pip.document);
-   pip.addEventListener('pagehide',()=>{pip=undefined;pipView=undefined;pipPreferred=false;render();},{once:true});
-  }catch{pipPreferred=false;error='Не удалось открыть окно. Вернитесь в Телемост и попробуйте ещё раз.';}finally{busy=false;render();}}
+  pip:async(v:boolean)=>{if(!v){openingCancelled=true;error='';pip?.close();render();return;}if(busy||pip||!api)return;openingCancelled=false;busy=true;error='';render();try{
+   const opened=await api.requestWindow({width:320,height:420});if(openingCancelled){opened.close();return;}pip=opened;pip.document.title='Чат занятия';pipView=createChatView(pip.document);
+   pip.addEventListener('pagehide',()=>{pip=undefined;pipView=undefined;render();},{once:true});
+  }catch{error='Не удалось открыть окно. Вернитесь в Телемост и попробуйте ещё раз.';}finally{busy=false;render();}}
  };
  function clearAnalysisTimer(){if(analysisTimer!==undefined)window.clearTimeout(analysisTimer);analysisTimer=undefined;analysisDueAt=undefined;}
  function scheduleAnalysis(){
@@ -88,7 +89,13 @@ if (!context.teacherAssistantStarted) {
   }
   if(m.command==='stop')actions.stop();
   if(m.command==='history')actions.history(m.value===true);
-  if(m.command==='pip'){pipPreferred=m.value===true;if(active){void actions.pip(pipPreferred).then(()=>reply(snapshot()));return true;}}
+  if(m.command==='chat'){
+   if(pip){pip.focus();reply(snapshot());return;}
+   if(!api){error='Окно чата недоступно в этом браузере.';reply(snapshot());return;}
+   // Reuse the existing PiP lifecycle; opening a chat never starts a new lesson.
+   void actions.pip(true).then(()=>reply(snapshot()));return true;
+  }
+  if(m.command==='pip'){pipPreferred=m.value===true;if(active || (!pipPreferred && (pip || busy))){void actions.pip(pipPreferred).then(()=>reply(snapshot()));return true;}}
   reply(snapshot());
  });
  window.addEventListener('pagehide',()=>{clearAnalysisTimer();actions.stop();pip?.close();});render();

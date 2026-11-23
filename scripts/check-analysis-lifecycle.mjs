@@ -25,11 +25,17 @@ const output = await build({
   } }]
 });
 const callbacks = new Map();
-let nextId = 0, analysisRequests = 0, command;
+let nextId = 0, analysisRequests = 0, command, openedWindows = 0, focusedWindows = 0, closeChat;
 globalThis.window = {
   setInterval: () => ++nextId, clearInterval() {}, addEventListener() {},
   setTimeout: callback => { const id = ++nextId; callbacks.set(id, callback); return id; },
-  clearTimeout: id => callbacks.delete(id)
+  clearTimeout: id => callbacks.delete(id),
+  documentPictureInPicture: { async requestWindow() {
+    openedWindows++;
+    return { document: {}, focus() { focusedWindows++; },
+      addEventListener(name, callback) { if (name === 'pagehide') closeChat = callback; },
+      close() { closeChat?.(); } };
+  } }
 };
 globalThis.location = { origin: 'https://telemost.yandex.ru' };
 globalThis.chrome = { runtime: {
@@ -48,3 +54,32 @@ pending(); // Даже если callback уже попал в очередь с�
 send('analyze');
 assert.equal(analysisRequests, 0, 'После завершения занятия запросы не отправляются');
 console.log('Analysis lifecycle check passed');
+
+const request = (name, value) => new Promise(resolve => command({type:'teacher-command',command:name,value}, {}, resolve));
+let state = await request('chat');
+assert.equal(state.active, false, 'Открытие чата не начинает новую пару');
+assert.equal(state.ended, true);
+assert.equal(state.messages.length, 1, 'Собранные сообщения сохраняются');
+assert.equal(state.pip, true);
+assert.equal(state.pipPreferred, false, 'Разовое открытие сохраняет настройку');
+assert.equal(openedWindows, 1);
+state = await request('chat');
+assert.equal(openedWindows, 1, 'Повторное открытие использует существующее окно');
+assert.equal(focusedWindows, 1);
+state = await request('history', true);
+assert.equal(state.history, true);
+assert.equal(state.pip, true, 'История не закрывает чат');
+closeChat();
+state = await request('state');
+assert.equal(state.pip, false);
+assert.equal(state.pipPreferred, false);
+assert.equal(state.ended, true, 'Закрытие чата не меняет состояние пары');
+assert.equal(state.history, true);
+console.log('Chat command check passed: retained messages, focus, independent history and close lifecycle.');
+
+await request('pip', true);
+await request('start');
+closeChat();
+state = await request('state');
+assert.equal(state.active, true);
+assert.equal(state.pipPreferred, true, 'Крестик не меняет настройку запуска');

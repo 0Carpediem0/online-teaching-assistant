@@ -13,4 +13,17 @@ export const styles = `
 @media(max-width:340px){#panel{padding:14px}h1{font-size:20px}.counter{font-size:9px}.session{padding:13px}}
 #analysis-status{font-size:11px;color:var(--muted);margin:8px 0}#questions{list-style:none;padding:0;margin:6px 0}#questions li{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:9px;margin:5px 0;font-size:12px}
 #panel h3{font-size:11px;margin:10px 0 4px}#question-buckets,#technical-issues{list-style:none;padding:0;margin:0}#question-buckets li,#technical-issues li{font-size:11px;padding:5px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+.toggles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{display:grid;place-items:center;gap:6px;aspect-ratio:1;padding:10px 8px;border:1px solid var(--line);border-radius:18px;background:var(--paper);color:var(--ink);text-align:center;transition:background .15s,border-color .15s}
+.tile:hover:not(:disabled){background:var(--soft)}
+.tile[aria-checked=true]{background:var(--soft);border-color:var(--green);color:var(--green)}
+.tile[aria-checked=true] .tile-icon{background:var(--green);color:#fff}
+.tile[aria-disabled=true]{cursor:default}
+.tile-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:var(--bg);color:var(--muted);font-size:16px;line-height:1}
+.tile-label{font-size:11px;font-weight:600;line-height:1.25}
+.tile-note{font-size:10px;color:var(--muted);line-height:1.2}
+#main-screen{display:flex;gap:20px}.col-left{min-width:0}.col-right{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px}.session{margin-top:0}.session-top{flex-wrap:wrap}.analysis-feed{flex:1;max-height:350px;overflow:auto;padding:12px;background:var(--paper);border:1px solid var(--line);border-radius:20px;overflow-wrap:anywhere}.analysis-feed .section-head{border:0;padding:0}.analysis-feed h2{font-size:14px}.analysis-feed .primary{margin-top:10px}.open-chat{margin:0}.diagnostics-link{width:100%;margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:14px;color:var(--green);background:var(--paper)}.tile[aria-checked=true]{background:var(--soft);border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}.tile small{font-size:10px;color:var(--muted)}#hide{position:absolute;right:4px;top:0;z-index:1}#chat-screen #messages{max-height:400px}#back-chat{border:0;background:transparent;color:var(--green);padding:8px 0}#diagnostic-screen{padding:0}#diagnostic-body{display:grid;grid-template-columns:1fr 1fr;gap:10px}#diagnostic-body>.device-check-heading,#diagnostic-body>.device-check{grid-column:1/-1}#diagnostic-body .diagnostic-card{margin:0}#panel{position:relative;width:640px;max-height:580px;border-radius:28px;padding:20px}.connection-preview{padding:24px}
+.toggles{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.tile{min-width:0;font-size:11px;line-height:1.3;overflow-wrap:anywhere}.tile small{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden}.tile>span:not(.tile-icon){font-weight:600}#panel{overflow-y:auto}#panel .col-left{flex:0 0 240px}.analysis-feed{min-height:260px}#open-diagnostics.diagnostics-link{display:block;width:100%;height:auto;margin:0;padding:10px;font-size:12px;border-radius:14px}
+.col-left{display:flex;flex-direction:column;gap:12px}
+@media(max-width:540px){#panel #main-screen{flex-direction:column}#panel .col-left{flex-basis:auto}#diagnostic-body{display:block}}
 `;
