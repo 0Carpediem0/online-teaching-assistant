@@ -14,4 +14,7 @@ await copyFile('manifest.json', 'dist/manifest.json');
 await build({entryPoints:['src/popup.ts'],bundle:true,outfile:'dist/popup.js',format:'iife',target:'chrome120',minify:true});
 await copyFile('popup.html', 'dist/popup.html');
 await copyFile('popup.css', 'dist/popup.css');
+await build({entryPoints:['src/options.ts'],bundle:true,outfile:'dist/options.js',format:'iife',target:'chrome120',minify:true});
+await copyFile('options.html', 'dist/options.html');
+await copyFile('options.css', 'dist/options.css');
 console.log('Built dist/');

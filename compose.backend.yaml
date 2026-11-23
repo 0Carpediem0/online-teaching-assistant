@@ -1,0 +1,38 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ollama"]
+    restart: unless-stopped
+    volumes:
+      - ollama-models:/root/.ollama
+    networks:
+      - backend
+
+  analysis-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: unless-stopped
+    environment:
+      ANALYSIS_HOST: 0.0.0.0
+      ANALYSIS_PORT: 8787
+      ANALYSIS_PROVIDER: ${ANALYSIS_PROVIDER:-deepseek}
+      ANALYSIS_API_TOKEN: ${ANALYSIS_API_TOKEN:?Задайте ANALYSIS_API_TOKEN в .env}
+      ANALYSIS_MODEL: ${ANALYSIS_MODEL:-deepseek-flash}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      OLLAMA_URL: ${OLLAMA_URL:-http://ollama:11434}
+    ports:
+      - "127.0.0.1:8787:8787"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8787/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  ollama-models:

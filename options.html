@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Подключение к серверу — Ассистент преподавателя</title><link rel="stylesheet" href="options.css"></head>
+<body><main><h1>Подключение к серверу анализа</h1><p>Укажите адрес внутреннего API. Ключ доступа хранится локально в этом профиле Chrome.</p>
+<form id="settings"><label for="endpoint">Адрес API</label><input id="endpoint" type="url" required placeholder="https://analysis.example.edu" autocomplete="url"><small>Укажите только адрес сервера, без <code>/v1/analyze</code>. Для локальной разработки допустим HTTP на localhost.</small>
+<label for="token">Ключ доступа</label><input id="token" type="password" autocomplete="new-password"><small>Оставьте пустым, если сервер работает без ключа (только локальная разработка).</small>
+<button type="submit">Сохранить настройки</button><p id="status" role="status"></p></form></main><script src="options.js"></script></body></html>
