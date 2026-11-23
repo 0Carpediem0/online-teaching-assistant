@@ -13,7 +13,7 @@ pipDoc.documentElement.lang = 'ru';
 const pipView = createChatView(pipDoc);
 const view = createView(root, {
   toggle() {},
-  openChat() { state.pip = true; state.pipPreferred = true; render(); },
+  openChat() { state.pip = true; render(); },
   checkDevices() { state.deviceCheck = {phase:'done',checkedAt:Date.now(),microphone:{tone:'ok',text:'Демонстрация: микрофон работает'},camera:{tone:'warning',text:'Демонстрация: камера выключена'}}; render(); },
   start() { state = { ...state, active: true, ended: false, chat: 'available', error: '', messages: [], compiledQuestions:[], compiledTechnicalIssues:[], analysisPending:0, analysisSummary:undefined, analysisError:'', pip: state.pipPreferred }; render(); },
   stop() { state.active = false; state.ended = true; render(); },

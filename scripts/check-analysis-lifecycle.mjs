@@ -61,6 +61,7 @@ assert.equal(state.active, false, 'Открытие чата не начинае
 assert.equal(state.ended, true);
 assert.equal(state.messages.length, 1, 'Собранные сообщения сохраняются');
 assert.equal(state.pip, true);
+assert.equal(state.pipPreferred, false, 'Разовое открытие сохраняет настройку');
 assert.equal(openedWindows, 1);
 state = await request('chat');
 assert.equal(openedWindows, 1, 'Повторное открытие использует существующее окно');
@@ -75,3 +76,10 @@ assert.equal(state.pipPreferred, false);
 assert.equal(state.ended, true, 'Закрытие чата не меняет состояние пары');
 assert.equal(state.history, true);
 console.log('Chat command check passed: retained messages, focus, independent history and close lifecycle.');
+
+await request('pip', true);
+await request('start');
+closeChat();
+state = await request('state');
+assert.equal(state.active, true);
+assert.equal(state.pipPreferred, true, 'Крестик не меняет настройку запуска');

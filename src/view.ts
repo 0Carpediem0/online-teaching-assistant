@@ -117,15 +117,15 @@ export function createView(root: ShadowRoot | HTMLElement, actions: Actions, det
     setText('pip-note', !state.supported ? 'Недоступно в этом браузере' : state.busy ? 'Открываем окно…' : state.active ? state.pip ? 'Окно открыто · можно закрыть переключателем' : 'Открыть отдельное окно чата' : 'Открыть отдельное окно чата при старте');
     notice.render(state.error ? {
       key: `pip:${state.error}`, tone: 'warning', title: 'Не получилось открыть окно чата',
-      message: 'Вернитесь в Телемост и включите окно поверх презентации ещё раз.'
+      message: 'Нажмите «Показать чат здесь», чтобы открыть переписку.'
     } : state.active && state.chat === 'unavailable' ? {
       key: 'chat-unavailable', tone: 'info', title: 'Чат пока недоступен',
       message: 'Откройте чат Телемоста вручную, чтобы продолжить получать сообщения.'
     } : undefined);
     get('history').setAttribute('aria-checked', String(state.history));
-    get('open-chat').dataset.supported = String(state.supported);
+    get('open-chat').dataset.supported = String(state.supported && !state.error);
     get<HTMLButtonElement>('open-chat').disabled = state.busy;
-    setText('open-chat', state.busy ? 'Открываем…' : state.pip ? 'Перейти к чату ↗' : state.supported ? 'Открыть чат ↗' : 'Показать чат здесь');
+    setText('open-chat', state.busy ? 'Открываем…' : state.pip ? 'Перейти к чату ↗' : state.supported && !state.error ? 'Открыть чат ↗' : 'Показать чат здесь');
     setText('count', `Новых за занятие: ${state.messages.filter(m => m.origin === 'observed').length}`);
     get<HTMLButtonElement>('analyze').disabled = !state.active || !state.analysisPending || Boolean(state.analysisBusy);
     setText('analyze', state.analysisBusy ? 'Анализируем…' : `Анализировать сейчас (${state.analysisPending ?? 0})`);
